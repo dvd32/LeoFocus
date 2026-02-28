@@ -260,11 +260,5 @@ Data Science @ EIT Digital Master School (POLIMI, AALTO)
 
 ---
 
-## 📜 License
-
-MIT License
-
----
-
 > *“Details make perfection, and perfection is not a detail.”*
 > — Leonardo da Vinci

@@ -7,7 +7,7 @@ from pynput import keyboard, mouse
 import subprocess
 from collections import Counter
 from local_summarizer import get_start_session_advice
-from llm_client_2 import create_json_memory, generate_final_report_from_memory
+from llm_client import create_json_memory, generate_final_report_from_memory
 
 # FORCE UTF-8 ON WINDOWS
 if sys.platform.startswith("win"):

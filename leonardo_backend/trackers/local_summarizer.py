@@ -1,4 +1,4 @@
-from llm_client_2 import ask_llm
+from llm_client import ask_llm
 
 def get_start_session_advice(user_context):
     """

@@ -27,7 +27,7 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
       vsync: this,
       duration: const Duration(seconds: 20),
     )..repeat();
-    
+
     _fadeController = AnimationController(
       vsync: this,
       duration: const Duration(milliseconds: 800),
@@ -58,18 +58,24 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
                   Positioned(
                     top: -150 + (50 * _orbController.value),
                     right: -100,
-                    child: _buildOrb(450, LeonardoTheme.accent.withValues(alpha: 0.08)),
+                    child: _buildOrb(
+                      450,
+                      LeonardoTheme.accent.withValues(alpha: 0.08),
+                    ),
                   ),
                   Positioned(
                     bottom: -100 + (30 * (1 - _orbController.value)),
                     left: -80,
-                    child: _buildOrb(380, LeonardoTheme.gold.withValues(alpha: 0.06)),
+                    child: _buildOrb(
+                      380,
+                      LeonardoTheme.gold.withValues(alpha: 0.06),
+                    ),
                   ),
                 ],
               );
             },
           ),
-          
+
           // Main Content
           SafeArea(
             child: FadeTransition(
@@ -78,7 +84,10 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
                 child: ConstrainedBox(
                   constraints: const BoxConstraints(maxWidth: 1100),
                   child: Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 32.0, vertical: 24),
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 32.0,
+                      vertical: 24,
+                    ),
                     child: Column(
                       children: [
                         _buildHeader(context, leonardo),
@@ -130,29 +139,32 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
     );
   }
 
-Widget _buildHeader(BuildContext context, LeonardoService leonardo) {
+  Widget _buildHeader(BuildContext context, LeonardoService leonardo) {
     return Column(
-      crossAxisAlignment: CrossAxisAlignment.center, 
+      crossAxisAlignment: CrossAxisAlignment.center,
       children: [
         Text(
-          "LeoFocus", 
+          "LeoFocus",
           style: GoogleFonts.italianno(
-            fontSize: 96, 
+            fontSize: 96,
             fontWeight: FontWeight.w500,
             color: LeonardoTheme.ink,
             // 1. MODIFICA FONDAMENTALE: height < 1.0 "mangia" lo spazio vuoto
-            height: 0.8, 
+            height: 0.8,
           ),
           textAlign: TextAlign.center,
         ),
-        
+
         // 2. Rimuovi o commenta il SizedBox se vuoi che siano appiccicati
-        // const SizedBox(height: 4), 
-        
-        // Se vuoi sovrapporli leggermente o avvicinarli ancora di più, 
+        // const SizedBox(height: 4),
+
+        // Se vuoi sovrapporli leggermente o avvicinarli ancora di più,
         // puoi usare Transform.translate per tirare su il sottotitolo:
         Transform.translate(
-          offset: const Offset(0, -10), // Valore negativo per salire (es. -10, -15)
+          offset: const Offset(
+            0,
+            -10,
+          ), // Valore negativo per salire (es. -10, -15)
           child: Text(
             _getLeonardoSubtitle(leonardo),
             style: GoogleFonts.inter(
@@ -166,15 +178,19 @@ Widget _buildHeader(BuildContext context, LeonardoService leonardo) {
       ],
     );
   }
+
   // 2. AGGIUNGI QUESTA VISTA "PONTE"
-  Widget _buildLoadingAdviceView(BuildContext context, LeonardoService leonardo) {
+  Widget _buildLoadingAdviceView(
+    BuildContext context,
+    LeonardoService leonardo,
+  ) {
     return Column(
       mainAxisAlignment: MainAxisAlignment.center,
       children: [
         // Avatar che pulsa o fisso
         _buildLeonardoAvatar(leonardo, size: 120),
         const SizedBox(height: 48),
-        
+
         GlassCard(
           padding: const EdgeInsets.all(32),
           child: Column(
@@ -217,17 +233,15 @@ Widget _buildHeader(BuildContext context, LeonardoService leonardo) {
   // LOGICA DI NAVIGAZIONE PRINCIPALE
   Widget _buildCurrentState(BuildContext context, LeonardoService leonardo) {
     if (leonardo.finalReport != null) {
-      return const ReportView(); 
-    } 
+      return const ReportView();
+    }
     // NUOVO STATO: Consigli Iniziali
     else if (leonardo.initialAdvice != null && !leonardo.isAdviceAcknowledged) {
       return _buildAdviceView(context, leonardo);
-    }
-    else if (leonardo.isWaitingForAdvice) {
+    } else if (leonardo.isWaitingForAdvice) {
       return _buildLoadingAdviceView(context, leonardo);
-    } 
-    else if (leonardo.isRunning || leonardo.isGeneratingReport) {
-      return const RunningView(); 
+    } else if (leonardo.isRunning || leonardo.isGeneratingReport) {
+      return const RunningView();
     } else {
       return _buildSetupView(context, leonardo);
     }
@@ -267,7 +281,9 @@ Widget _buildHeader(BuildContext context, LeonardoService leonardo) {
                             offset: const Offset(4, 4),
                           ),
                         ],
-                        border: Border.all(color: LeonardoTheme.inkLight.withValues(alpha: 0.1)),
+                        border: Border.all(
+                          color: LeonardoTheme.inkLight.withValues(alpha: 0.1),
+                        ),
                       ),
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
@@ -297,7 +313,7 @@ Widget _buildHeader(BuildContext context, LeonardoService leonardo) {
                 ],
               ),
             ),
-            
+
             const SizedBox(height: 48),
 
             ConstrainedBox(
@@ -308,9 +324,13 @@ Widget _buildHeader(BuildContext context, LeonardoService leonardo) {
                   children: [
                     TextField(
                       controller: _roleController,
-                      style: GoogleFonts.inter(fontSize: 16, color: LeonardoTheme.ink),
+                      style: GoogleFonts.inter(
+                        fontSize: 16,
+                        color: LeonardoTheme.ink,
+                      ),
                       decoration: InputDecoration(
-                        hintText: "e.g., Studying Calculus, Coding a Flutter app...",
+                        hintText:
+                            "e.g., Studying Calculus, Coding a Flutter app...",
                         prefixIcon: const Icon(Icons.psychology_outlined),
                         filled: true,
                         fillColor: Colors.white.withValues(alpha: 0.5),
@@ -337,7 +357,10 @@ Widget _buildHeader(BuildContext context, LeonardoService leonardo) {
                         child: Row(
                           mainAxisAlignment: MainAxisAlignment.center,
                           children: [
-                            const Text("CONSULT LEONARDO", style: TextStyle(fontSize: 15, letterSpacing: 1)),
+                            const Text(
+                              "CONSULT LEONARDO",
+                              style: TextStyle(fontSize: 15, letterSpacing: 1),
+                            ),
                             const SizedBox(width: 12),
                             const Icon(Icons.arrow_forward_rounded, size: 20),
                           ],
@@ -361,7 +384,7 @@ Widget _buildHeader(BuildContext context, LeonardoService leonardo) {
       children: [
         _buildLeonardoAvatar(leonardo, size: 120),
         const SizedBox(height: 32),
-        
+
         Expanded(
           child: GlassCard(
             padding: EdgeInsets.zero,
@@ -372,7 +395,11 @@ Widget _buildHeader(BuildContext context, LeonardoService leonardo) {
                   padding: const EdgeInsets.symmetric(vertical: 16),
                   decoration: BoxDecoration(
                     color: LeonardoTheme.accent.withValues(alpha: 0.1),
-                    border: Border(bottom: BorderSide(color: LeonardoTheme.accent.withValues(alpha: 0.1))),
+                    border: Border(
+                      bottom: BorderSide(
+                        color: LeonardoTheme.accent.withValues(alpha: 0.1),
+                      ),
+                    ),
                   ),
                   child: Text(
                     "LEONARDO'S PRECEPTS",
@@ -385,13 +412,14 @@ Widget _buildHeader(BuildContext context, LeonardoService leonardo) {
                     ),
                   ),
                 ),
-                
+
                 Expanded(
                   child: SingleChildScrollView(
                     child: Padding(
                       padding: const EdgeInsets.all(32.0),
                       child: MarkdownBody(
-                        data: leonardo.initialAdvice ?? "Consulting the codex...",
+                        data:
+                            leonardo.initialAdvice ?? "Consulting the codex...",
                         styleSheet: MarkdownStyleSheet(
                           p: GoogleFonts.inter(
                             fontSize: 18,
@@ -415,7 +443,7 @@ Widget _buildHeader(BuildContext context, LeonardoService leonardo) {
             ),
           ),
         ),
-        
+
         const SizedBox(height: 32),
 
         SizedBox(
@@ -431,8 +459,14 @@ Widget _buildHeader(BuildContext context, LeonardoService leonardo) {
             child: Row(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                const Text("I SHALL FOLLOW THY COUNSEL", 
-                  style: TextStyle(fontSize: 15, letterSpacing: 1.5, fontWeight: FontWeight.bold)),
+                const Text(
+                  "I SHALL FOLLOW THY COUNSEL",
+                  style: TextStyle(
+                    fontSize: 15,
+                    letterSpacing: 1.5,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
                 const SizedBox(width: 12),
                 const Icon(Icons.check_circle_outline, size: 22),
               ],
@@ -447,10 +481,11 @@ Widget _buildHeader(BuildContext context, LeonardoService leonardo) {
   Widget _buildLeonardoAvatar(LeonardoService leonardo, {double size = 100.0}) {
     Color statusColor;
     String assetImage = 'assets/leo.png';
-    
+
     if (leonardo.finalReport != null) {
       statusColor = LeonardoTheme.success;
-    } else if (leonardo.initialAdvice != null && !leonardo.isAdviceAcknowledged) {
+    } else if (leonardo.initialAdvice != null &&
+        !leonardo.isAdviceAcknowledged) {
       statusColor = LeonardoTheme.gold; // Colore oro quando dà consigli
     } else if (leonardo.isRunning) {
       statusColor = LeonardoTheme.accent;
@@ -474,10 +509,10 @@ Widget _buildHeader(BuildContext context, LeonardoService leonardo) {
         border: Border.all(color: statusColor, width: 3.0),
       ),
       child: Center(
-        child: ClipOval( 
+        child: ClipOval(
           child: Image.asset(
             assetImage,
-            fit: BoxFit.cover, 
+            fit: BoxFit.cover,
             width: size,
             height: size,
           ),
@@ -489,7 +524,8 @@ Widget _buildHeader(BuildContext context, LeonardoService leonardo) {
   String _getLeonardoSubtitle(LeonardoService leonardo) {
     if (leonardo.finalReport != null) {
       return "Your Renaissance mentor has spoken";
-    } else if (leonardo.initialAdvice != null && !leonardo.isAdviceAcknowledged) {
+    } else if (leonardo.initialAdvice != null &&
+        !leonardo.isAdviceAcknowledged) {
       return "Wisdom for the task ahead";
     } else if (leonardo.isGeneratingReport) {
       return "Composing your codex entry...";

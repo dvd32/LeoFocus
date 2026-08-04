@@ -21,7 +21,8 @@ class RunningView extends StatelessWidget {
               // --- LEFT COLUMN: UNICA CARD (Avatar + Timer) ---
               Expanded(
                 flex: 2,
-                child: GlassCard( // <--- ORA È UN'UNICA GLASS CARD
+                child: GlassCard(
+                  // <--- ORA È UN'UNICA GLASS CARD
                   child: Column(
                     children: [
                       // 1. SEZIONE AVATAR (Si prende tutto lo spazio disponibile)
@@ -29,18 +30,25 @@ class RunningView extends StatelessWidget {
                         child: Column(
                           mainAxisAlignment: MainAxisAlignment.center,
                           children: [
-                            _buildRunningAvatar(context, leonardo, size: 130), // Un po' più grande
+                            _buildRunningAvatar(
+                              context,
+                              leonardo,
+                              size: 130,
+                            ), // Un po' più grande
                             const SizedBox(height: 24),
                             Padding(
-                              padding: const EdgeInsets.symmetric(horizontal: 16.0),
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: 16.0,
+                              ),
                               child: Text(
-                                leonardo.leoComment.length > 50 
-                                ? "I am observing your craft..." 
-                                : leonardo.leoComment,
+                                leonardo.leoComment.length > 50
+                                    ? "I am observing your craft..."
+                                    : leonardo.leoComment,
                                 textAlign: TextAlign.center,
                                 style: GoogleFonts.inter(
                                   fontSize: 15,
-                                  fontWeight: FontWeight.w500, // Leggermente più marcato
+                                  fontWeight: FontWeight
+                                      .w500, // Leggermente più marcato
                                   fontStyle: FontStyle.italic,
                                   color: LeonardoTheme.ink,
                                   height: 1.5,
@@ -50,7 +58,7 @@ class RunningView extends StatelessWidget {
                           ],
                         ),
                       ),
-                      
+
                       // Divisore sottile per separare visivamente l'area timer
                       Divider(
                         color: LeonardoTheme.inkLight.withValues(alpha: 0.1),
@@ -65,11 +73,16 @@ class RunningView extends StatelessWidget {
                           Container(
                             padding: const EdgeInsets.all(10),
                             decoration: BoxDecoration(
-                              color: LeonardoTheme.accent.withValues(alpha: 0.1),
+                              color: LeonardoTheme.accent.withValues(
+                                alpha: 0.1,
+                              ),
                               borderRadius: BorderRadius.circular(12),
                             ),
-                            child: const Icon(Icons.timer_outlined, 
-                              color: LeonardoTheme.accent, size: 20),
+                            child: const Icon(
+                              Icons.timer_outlined,
+                              color: LeonardoTheme.accent,
+                              size: 20,
+                            ),
                           ),
                           const SizedBox(width: 16),
                           Column(
@@ -100,10 +113,10 @@ class RunningView extends StatelessWidget {
                   ),
                 ),
               ),
-              
+
               const SizedBox(width: 16),
-              
-              // Right Column: App Usage 
+
+              // Right Column: App Usage
               Expanded(
                 flex: 3,
                 child: GlassCard(
@@ -112,8 +125,11 @@ class RunningView extends StatelessWidget {
                     children: [
                       Row(
                         children: [
-                          const Icon(Icons.apps_rounded, 
-                            color: LeonardoTheme.accent, size: 20),
+                          const Icon(
+                            Icons.apps_rounded,
+                            color: LeonardoTheme.accent,
+                            size: 20,
+                          ),
                           const SizedBox(width: 12),
                           Text(
                             "TOOLS IN USE",
@@ -141,15 +157,19 @@ class RunningView extends StatelessWidget {
                             : ListView.separated(
                                 itemCount: leonardo.topApps.length,
                                 separatorBuilder: (c, i) => Divider(
-                                  color: LeonardoTheme.inkLight.withValues(alpha: 0.1),
+                                  color: LeonardoTheme.inkLight.withValues(
+                                    alpha: 0.1,
+                                  ),
                                   height: 24,
                                 ),
                                 itemBuilder: (ctx, index) {
                                   final app = leonardo.topApps[index];
                                   final percentage = leonardo.totalTime > 0
-                                      ? ((app[1] as num) / leonardo.totalTime * 100)
+                                      ? ((app[1] as num) /
+                                            leonardo.totalTime *
+                                            100)
                                       : 0.0;
-                                  
+
                                   return Row(
                                     children: [
                                       Container(
@@ -158,11 +178,17 @@ class RunningView extends StatelessWidget {
                                         decoration: BoxDecoration(
                                           gradient: LinearGradient(
                                             colors: [
-                                              LeonardoTheme.accent.withValues(alpha: 0.8),
-                                              LeonardoTheme.accent.withValues(alpha: 0.6),
+                                              LeonardoTheme.accent.withValues(
+                                                alpha: 0.8,
+                                              ),
+                                              LeonardoTheme.accent.withValues(
+                                                alpha: 0.6,
+                                              ),
                                             ],
                                           ),
-                                          borderRadius: BorderRadius.circular(10),
+                                          borderRadius: BorderRadius.circular(
+                                            10,
+                                          ),
                                         ),
                                         child: Center(
                                           child: Text(
@@ -177,7 +203,8 @@ class RunningView extends StatelessWidget {
                                       const SizedBox(width: 16),
                                       Expanded(
                                         child: Column(
-                                          crossAxisAlignment: CrossAxisAlignment.start,
+                                          crossAxisAlignment:
+                                              CrossAxisAlignment.start,
                                           children: [
                                             Text(
                                               app[0].toString(),
@@ -190,14 +217,20 @@ class RunningView extends StatelessWidget {
                                             ),
                                             const SizedBox(height: 4),
                                             ClipRRect(
-                                              borderRadius: BorderRadius.circular(4),
+                                              borderRadius:
+                                                  BorderRadius.circular(4),
                                               child: LinearProgressIndicator(
                                                 value: percentage / 100,
                                                 minHeight: 4,
-                                                backgroundColor: Colors.grey.shade200,
-                                                valueColor: AlwaysStoppedAnimation(
-                                                  LeonardoTheme.accent.withValues(alpha: 0.7),
-                                                ),
+                                                backgroundColor:
+                                                    Colors.grey.shade200,
+                                                valueColor:
+                                                    AlwaysStoppedAnimation(
+                                                      LeonardoTheme.accent
+                                                          .withValues(
+                                                            alpha: 0.7,
+                                                          ),
+                                                    ),
                                               ),
                                             ),
                                           ],
@@ -205,7 +238,8 @@ class RunningView extends StatelessWidget {
                                       ),
                                       const SizedBox(width: 16),
                                       Column(
-                                        crossAxisAlignment: CrossAxisAlignment.end,
+                                        crossAxisAlignment:
+                                            CrossAxisAlignment.end,
                                         children: [
                                           Text(
                                             "${(app[1] as num).toInt()}s",
@@ -236,7 +270,7 @@ class RunningView extends StatelessWidget {
           ),
         ),
         const SizedBox(height: 16),
-        
+
         // Bottom Bar: Stop Button
         if (leonardo.isGeneratingReport)
           GlassCard(
@@ -277,7 +311,10 @@ class RunningView extends StatelessWidget {
                 children: [
                   Icon(Icons.stop_circle_outlined, size: 20),
                   SizedBox(width: 12),
-                  Text("END SESSION", style: TextStyle(fontSize: 15, letterSpacing: 1)),
+                  Text(
+                    "END SESSION",
+                    style: TextStyle(fontSize: 15, letterSpacing: 1),
+                  ),
                 ],
               ),
             ),
@@ -287,8 +324,11 @@ class RunningView extends StatelessWidget {
   }
 
   // --- AVATAR ---
-  Widget _buildRunningAvatar(BuildContext context, LeonardoService leonardo, {double size = 100.0}) {
-    
+  Widget _buildRunningAvatar(
+    BuildContext context,
+    LeonardoService leonardo, {
+    double size = 100.0,
+  }) {
     String asset;
     Color borderColor;
 
@@ -297,12 +337,12 @@ class RunningView extends StatelessWidget {
       //case 'joy':
       case 'happy':
         asset = 'assets/happy.png';
-        borderColor = LeonardoTheme.success; 
+        borderColor = LeonardoTheme.success;
         break;
       //case 'frustrated':
       case 'angry':
-        asset = 'assets/angry.png'; 
-        borderColor = LeonardoTheme.failure; 
+        asset = 'assets/angry.png';
+        borderColor = LeonardoTheme.failure;
         break;
       //case 'worried':
       /*case 'sad':
@@ -313,7 +353,7 @@ class RunningView extends StatelessWidget {
       //case 'neutral':
       default:
         asset = 'assets/leo.png';
-        borderColor = LeonardoTheme.accent; 
+        borderColor = LeonardoTheme.accent;
     }
 
     return Container(
@@ -324,7 +364,9 @@ class RunningView extends StatelessWidget {
         color: Colors.white,
         boxShadow: [
           BoxShadow(
-            color: borderColor.withValues(alpha: 0.4), // Ombra più forte per vedere il cambio colore
+            color: borderColor.withValues(
+              alpha: 0.4,
+            ), // Ombra più forte per vedere il cambio colore
             blurRadius: 20,
             spreadRadius: 5,
           ),
@@ -338,9 +380,11 @@ class RunningView extends StatelessWidget {
           width: size,
           height: size,
           errorBuilder: (context, error, stackTrace) {
-             // Se l'immagine specifica non esiste, torna a Leo ma mantieni il bordo colorato!
-             debugPrint("⚠️ Immagine mancante per: ${leonardo.emotion} (cercavo $asset)");
-             return Image.asset('assets/leo.png', fit: BoxFit.cover);
+            // Se l'immagine specifica non esiste, torna a Leo ma mantieni il bordo colorato!
+            debugPrint(
+              "⚠️ Immagine mancante per: ${leonardo.emotion} (cercavo $asset)",
+            );
+            return Image.asset('assets/leo.png', fit: BoxFit.cover);
           },
         ),
       ),

@@ -5,15 +5,15 @@ import 'package:path/path.dart' as p;
 
 class LeonardoService extends ChangeNotifier {
   Process? _process;
-  
+
   // Stato UI
   bool isRunning = false;
   bool isGeneratingReport = false;
   String currentContext = "";
   bool isWaitingForAdvice = false;
-  
+
   // Gestione Consigli Iniziali
-  String? initialAdvice; 
+  String? initialAdvice;
   bool isAdviceAcknowledged = false;
 
   // Dati in tempo reale
@@ -35,14 +35,11 @@ class LeonardoService extends ChangeNotifier {
   String get pythonExec => Platform.isWindows ? 'python' : 'python3';
 
   // 2. Calcola il percorso backend in modo relativo
-  String get backendPath => p.join(
-        Directory.current.parent.path,
-        'leonardo_backend',
-        'trackers',
-      );
-  
+  String get backendPath =>
+      p.join(Directory.current.parent.path, 'leonardo_backend', 'trackers');
+
   final String scriptName = 'trackers.py';
-  
+
   Future<void> startSession(String context) async {
     currentContext = context;
     isRunning = true;
@@ -65,28 +62,32 @@ class LeonardoService extends ChangeNotifier {
 
     try {
       _process = await Process.start(
-        pythonExec, 
-        ['-u', scriptName, context], 
-        workingDirectory: backendPath, 
-        runInShell: true, 
+        pythonExec,
+        ['-u', scriptName, context],
+        workingDirectory: backendPath,
+        runInShell: true,
       );
 
       debugPrint("✅ Processo avviato (PID: ${_process!.pid})");
 
-      _process!.stdout.transform(utf8.decoder).transform(const LineSplitter()).listen((line) {
-        _parsePythonOutput(line);
-      });
+      _process!.stdout
+          .transform(utf8.decoder)
+          .transform(const LineSplitter())
+          .listen((line) {
+            _parsePythonOutput(line);
+          });
 
       _process!.stderr.transform(utf8.decoder).listen((data) {
         if (data.trim().isNotEmpty) {
-          if (data.contains("[DEBUG]") || data.contains("🛑") || data.contains("===")) {
-          debugPrint("PYTHON LOG: ${data.trim()}\n"); 
-        } else {
-          debugPrint("❌ PYTHON ERROR: $data"); 
-        }
+          if (data.contains("[DEBUG]") ||
+              data.contains("🛑") ||
+              data.contains("===")) {
+            debugPrint("PYTHON LOG: ${data.trim()}\n");
+          } else {
+            debugPrint("❌ PYTHON ERROR: $data");
+          }
         }
       });
-
     } catch (e) {
       debugPrint("❌ ERRORE LANCIO FLUTTER: $e");
       isRunning = false;
@@ -96,8 +97,8 @@ class LeonardoService extends ChangeNotifier {
 
   void _parsePythonOutput(String line) {
     try {
-      if (!line.trim().startsWith('{')) return; 
-      
+      if (!line.trim().startsWith('{')) return;
+
       final data = jsonDecode(line);
       final type = data['type'] as String?;
 
@@ -142,7 +143,7 @@ class LeonardoService extends ChangeNotifier {
           if (data.containsKey('focus_score')) {
             focusScore = data['focus_score'] ?? 100;
           }
-          
+
           notifyListeners();
           break;
 
@@ -160,7 +161,7 @@ class LeonardoService extends ChangeNotifier {
         // ============================================
         case 'report':
           debugPrint("📊 Report ricevuto da Python");
-          
+
           finalReport = data['content'];
 
           final stats = data['stats'] as Map<String, dynamic>?;
@@ -183,7 +184,7 @@ class LeonardoService extends ChangeNotifier {
           isRunning = false;
 
           notifyListeners();
-          _process?.kill(); 
+          _process?.kill();
           break;
 
         default:
@@ -215,7 +216,7 @@ class LeonardoService extends ChangeNotifier {
   // ============================================
   void acknowledgeAdvice() {
     debugPrint("✅ User acknowledged advice");
-    _process?.stdin.writeln('START'); 
+    _process?.stdin.writeln('START');
     isAdviceAcknowledged = true;
     notifyListeners();
   }
@@ -226,7 +227,7 @@ class LeonardoService extends ChangeNotifier {
   Future<void> stopSession() async {
     debugPrint("🛑 Invio segnale di stop a Python...");
     _process?.stdin.writeln('STOP');
-    
+
     // Aspetta un po' per permettere a Python di generare il report
     await Future.delayed(const Duration(milliseconds: 500));
   }
@@ -236,7 +237,7 @@ class LeonardoService extends ChangeNotifier {
   // ============================================
   void reset() {
     debugPrint("🔄 Resetting application state...");
-    
+
     // Report e stats
     finalReport = null;
     finalStats = null;

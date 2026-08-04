@@ -190,6 +190,69 @@ comportamento dell'app.
 - [x] CI GitHub Actions con `flutter analyze` + `ruff check`, se il repo
       resta mantenuto attivamente.
 
+## 🔑 Verifiche possibili solo con una GROQ_API_KEY viva
+
+Tutto lo strato LLM del backend non è mai stato eseguito durante la pulizia:
+è stato verificato solo il suo percorso di fallimento (senza chiave Leonardo
+"medita"). Con una chiave nell'ambiente si sbloccano queste verifiche, in
+ordine di rischio.
+
+**Non serve avviare una sessione vera**: `create_json_memory` e
+`generate_final_report_from_memory` si possono chiamare in isolamento con
+input sintetici. Una sessione completa richiederebbe anche i permessi di
+accessibilità macOS per `pynput` e 30+ secondi di tempo reale, che la chiave
+da sola non risolve.
+
+- [ ] **🔴 Il modello `llama-3.1-8b-instant` esiste ancora su Groq?**
+      (`llm_client.py:32`). Groq dismette i modelli con un certo ritmo e il
+      progetto è fermo da mesi. Se è stato deprecato **l'app è già rotta in
+      produzione** e nessuno se ne è accorto, perché ogni chiamata fallisce
+      dentro un `try` che degrada silenziosamente. È la verifica a più alto
+      valore di tutte.
+- [ ] **🔴 `create_json_memory` riesce davvero a estrarre il JSON?**
+      Usa `response.find('{')` / `rfind('}')` sulla risposta grezza
+      (`llm_client.py:96-105`). Se il modello incapsula in un blocco ```json
+      o aggiunge testo prima/dopo, il parsing può rompersi — e in caso di
+      fallimento la funzione **restituisce il contesto precedente senza
+      segnalare nulla**, quindi la sessione prosegue con dati stantii senza
+      che l'utente lo veda.
+- [ ] **🟡 `generate_final_report_from_memory` produce il Markdown atteso?**
+      Il prompt chiede una struttura precisa (tabella Performance Matrix,
+      sezioni, blockquote). `report_view.dart` la stila con uno
+      `MarkdownStyleSheet` costruito su misura per quella struttura. Se il
+      modello devia, il report si vede male e nessun test lo intercetta.
+- [ ] **🟡 L'LLM rispetta il `focus_score` che gli viene passato?**
+      Python calcola `int(100 - global_distraction)` e lo inietta nel prompt
+      come letterale, poi lo richiede indietro nel JSON, poi in `trackers.py`
+      lo ricorregge con il "math override" — ma solo **verso il basso**
+      (`if llm_score > max_allowed_score`). Se il modello restituisce un
+      valore più basso, quello passa. Andrebbe capito se succede.
+- [ ] **🟢 Catturare una risposta reale e scriverci un test offline.**
+      È il vero guadagno: con una risposta vera salvata come fixture si può
+      testare il parsing di `create_json_memory` **senza chiave**, quindi
+      anche in CI. Oggi quel parser non è coperto da niente.
+
+### Pulizia già identificata su questo strato (non serve la chiave)
+
+- [ ] **Il prompt chiede `leonardo_emotion` e nessuno lo legge.**
+      `llm_client.py:75` impone all'LLM di produrre
+      `"leonardo_emotion": "happy" | "normal" | "angry"`, ma `trackers.py`
+      calcola l'emozione per conto suo da `recent_distraction`
+      (righe 573-609, commento esplicito: *"Usiamo l'emozione calcolata da
+      Python"*) e il campo non viene letto da nessuna parte. Token generati e
+      buttati a ogni ciclo di 30 secondi, più il vincolo di formato che rende
+      la risposta più fragile da parsare.
+- [ ] **`current_emotion = 'worried'`** (`trackers.py:607`) non ha un asset:
+      `running_view.dart` gestisce solo `happy` e `angry`, tutto il resto cade
+      nel `default` con `leo.png`. O si aggiunge l'immagine o si toglie il ramo.
+
+### Se decidete di darmi una chiave
+
+Conviene generarne una **usa e getta** e revocarla dopo: passerebbe comunque
+nel mio contesto, e per quanto non la scriva da nessuna parte è più pulito
+trattarla come esposta. Il costo delle verifiche è trascurabile (Groq ha un
+free tier, servono ~5 chiamate).
+
 ## Cosa resta da fare
 
 1. **Rivedere e mergiare il branch `cleanup/dead-code`** (14 commit atomici,
@@ -202,9 +265,11 @@ comportamento dell'app.
 3. Verificare che la **CI passi davvero** al primo push: il workflow è
    scritto e i comandi girano in locale, ma i runner GitHub non li ho
    potuti riprodurre.
-4. Decidere su `frontend/assets/leo_quadrato.png` (927KB, non referenziato,
+4. **Controllare che il modello Groq non sia stato deprecato** — vedi la
+   sezione 🔑 sopra. Se lo è, l'app è rotta e il fallimento è silenzioso.
+5. Decidere su `frontend/assets/leo_quadrato.png` (927KB, non referenziato,
    attualmente non tracciato da git).
-5. Le voci ⬜ rimaste sopra, tutte opzionali.
+6. Le voci ⬜ rimaste sopra, tutte opzionali.
 
 ## Verifica finale eseguita (2026-08-04)
 

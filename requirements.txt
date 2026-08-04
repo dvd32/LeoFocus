@@ -1,3 +1,7 @@
+# LLM client (Groq API)
+groq>=0.11.0
+requests>=2.31.0
+
 # Core LLM dependencies (Pure Python - No C++ compiler needed!)
 transformers>=4.35.0
 torch>=2.0.0

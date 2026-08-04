@@ -232,19 +232,70 @@ da sola non risolve.
       testare il parsing di `create_json_memory` **senza chiave**, quindi
       anche in CI. Oggi quel parser non è coperto da niente.
 
-### Pulizia già identificata su questo strato (non serve la chiave)
+### Pulizia già identificata su questo strato
 
-- [ ] **Il prompt chiede `leonardo_emotion` e nessuno lo legge.**
-      `llm_client.py:75` impone all'LLM di produrre
-      `"leonardo_emotion": "happy" | "normal" | "angry"`, ma `trackers.py`
-      calcola l'emozione per conto suo da `recent_distraction`
-      (righe 573-609, commento esplicito: *"Usiamo l'emozione calcolata da
-      Python"*) e il campo non viene letto da nessuna parte. Token generati e
-      buttati a ogni ciclo di 30 secondi, più il vincolo di formato che rende
-      la risposta più fragile da parsare.
-- [ ] **`current_emotion = 'worried'`** (`trackers.py:607`) non ha un asset:
-      `running_view.dart` gestisce solo `happy` e `angry`, tutto il resto cade
-      nel `default` con `leo.png`. O si aggiunge l'immagine o si toglie il ramo.
+- [x] ~~Il prompt chiede `leonardo_emotion` e nessuno lo legge~~ — **fatto**.
+      Il campo e l'istruzione di classificazione sono usciti dal prompt.
+- [x] ~~`current_emotion = 'worried'` non ha un asset~~ — **fatto**, ramo
+      rimosso insieme ai `case` commentati in `running_view.dart`. Le emozioni
+      che Python può emettere sono ora esattamente due, `angry` e `happy`.
+
+## 🔌 Aprire l'app a un LLM qualsiasi (BYO key + BYO provider)
+
+Obiettivo: chiunque cloni deve poter usare **la propria chiave e il proprio
+provider**, senza essere vincolato a Groq e a `llama-3.1-8b-instant`.
+
+**Punto di partenza migliore del previsto:** la chiamata in `llm_client.py` è
+`client.chat.completions.create(model=..., messages=[...], max_tokens=...,
+temperature=...)`, cioè esattamente la forma Chat Completions di OpenAI —
+l'SDK Groq è compatibile per scelta. Le uniche due cose legate a Groq sono la
+costruzione del client e il model id letterale. La parte "ognuno porta la sua
+chiave" **è già fatta**: la chiave hardcoded è sparita, si legge dall'ambiente.
+
+Da fare, in quest'ordine (invertirlo fa scoprire il problema di latenza agli
+utenti invece che a voi):
+
+- [ ] **🔴 PRIMA: spostare la chiamata LLM fuori dal loop di rendering.**
+      In `report_loop_json` il `print` del pacchetto UI (ogni secondo) e
+      `create_json_memory` stanno nello stesso `while`, e la chiamata è
+      **sincrona**. Con Groq non si nota perché risponde in centinaia di ms;
+      con un Ollama locale o un provider lento **la UI si congela per tutta la
+      durata della chiamata** — timer fermo, finestra attiva ferma. È questo il
+      vero motivo per cui oggi "deve essere Groq": la latenza, non l'API.
+      Aprire ai provider generici senza risolverlo significa consegnare
+      un'app che a volte sembra bloccata.
+- [ ] **🟡 POI: generalizzare il client.** Sostituire `Groq(api_key=...)` con
+      l'SDK `openai` puntato a un `base_url` configurabile, e rendere
+      endpoint/modello/chiave tre variabili d'ambiente. Sono ~20 righe in
+      `llm_client.py` più uno scambio di dipendenza (`groq` → `openai`).
+      Copre OpenAI, Groq, OpenRouter, Together, Fireworks, Mistral, xAI,
+      vLLM, **Ollama e LM Studio in locale**. Restano fuori Anthropic e
+      Gemini, che hanno API di forma diversa (Gemini ha comunque un endpoint
+      compatibile).
+- [ ] **🟡 Rendere robusto il parsing JSON**, vedi la sezione 🔑 sopra. Con
+      provider arbitrari `find('{')`/`rfind('}')` non basta più: serve
+      `response_format={"type":"json_object"}` dove supportato e un fallback
+      che *segnali* il problema invece di restituire il contesto stantio.
+- [ ] **🟢 I prompt sono tarati su un modello piccolo e veloce**
+      ("max 3 sentences", "a few words long"). Su modelli grandi vanno bene,
+      su modelli minuscoli no. Da verificare quando aprite il ventaglio.
+
+### Configurazione: nomi delle variabili e `.env`
+
+- [ ] **🔴 `.env` NON è coperto dal `.gitignore`.** C'è `env/`, che matcha solo
+      la cartella del virtualenv: un file `.env` con dentro la chiave
+      **verrebbe tracciato da git**. Va aggiunto `.env` (e `.env.local`)
+      prima che qualcuno ce la metta.
+- [ ] **Nessuno carica `.env` oggi**: non c'è `python-dotenv` né una
+      `load_dotenv()`. Un `.env` nel repo non farebbe nulla — o si aggiunge
+      la dipendenza, o si esporta la variabile nella shell.
+- [ ] Committare un **`.env.example`** con le chiavi vuote, così chi clona sa
+      cosa serve senza indovinare.
+- **Nomi consigliati.** Finché il client è Groq, tenere `GROQ_API_KEY`: è
+  quello che il codice legge ed è anche il nome che l'SDK Groq riconosce da
+  solo. Quando generalizzate, passare alla terna neutra
+  `LLM_API_KEY` / `LLM_BASE_URL` / `LLM_MODEL` — non legare il nome della
+  variabile a un fornitore che volete smettere di imporre.
 
 ### Se decidete di darmi una chiave
 

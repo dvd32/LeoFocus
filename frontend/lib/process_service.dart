@@ -58,10 +58,10 @@ class LeonardoService extends ChangeNotifier {
 
     notifyListeners();
 
-    print("🚀 FLUTTER: Avvio Sessione...");
-    print("📂 Directory di lavoro: $backendPath");
-    print("🐍 Eseguibile: $pythonExec");
-    print("🎯 Contesto: $context");
+    debugPrint("🚀 FLUTTER: Avvio Sessione...");
+    debugPrint("📂 Directory di lavoro: $backendPath");
+    debugPrint("🐍 Eseguibile: $pythonExec");
+    debugPrint("🎯 Contesto: $context");
 
     try {
       _process = await Process.start(
@@ -71,7 +71,7 @@ class LeonardoService extends ChangeNotifier {
         runInShell: true, 
       );
 
-      print("✅ Processo avviato (PID: ${_process!.pid})");
+      debugPrint("✅ Processo avviato (PID: ${_process!.pid})");
 
       _process!.stdout.transform(utf8.decoder).transform(const LineSplitter()).listen((line) {
         _parsePythonOutput(line);
@@ -80,15 +80,15 @@ class LeonardoService extends ChangeNotifier {
       _process!.stderr.transform(utf8.decoder).listen((data) {
         if (data.trim().isNotEmpty) {
           if (data.contains("[DEBUG]") || data.contains("🛑") || data.contains("===")) {
-          print("PYTHON LOG: ${data.trim()}\n"); 
+          debugPrint("PYTHON LOG: ${data.trim()}\n"); 
         } else {
-          print("❌ PYTHON ERROR: $data"); 
+          debugPrint("❌ PYTHON ERROR: $data"); 
         }
         }
       });
 
     } catch (e) {
-      print("❌ ERRORE LANCIO FLUTTER: $e");
+      debugPrint("❌ ERRORE LANCIO FLUTTER: $e");
       isRunning = false;
       notifyListeners();
     }
@@ -108,7 +108,7 @@ class LeonardoService extends ChangeNotifier {
         // CONSIGLI INIZIALI
         // ============================================
         case 'initial_advice':
-          print("📜 Advice received from Python");
+          debugPrint("📜 Advice received from Python");
           initialAdvice = data['content'];
           isWaitingForAdvice = false;
           isAdviceAcknowledged = false;
@@ -159,7 +159,7 @@ class LeonardoService extends ChangeNotifier {
         // REPORT FINALE ⭐ CON STATS COMPLETO
         // ============================================
         case 'report':
-          print("📊 Report ricevuto da Python");
+          debugPrint("📊 Report ricevuto da Python");
           
           finalReport = data['content'];
 
@@ -177,7 +177,7 @@ class LeonardoService extends ChangeNotifier {
             'pause_count': stats?['pause_count'] ?? 0,
           };
 
-          print("✅ Stats estratte: $finalStats");
+          debugPrint("✅ Stats estratte: $finalStats");
 
           isGeneratingReport = false;
           isRunning = false;
@@ -187,11 +187,11 @@ class LeonardoService extends ChangeNotifier {
           break;
 
         default:
-          print("⚠️ Unknown message type: $type");
+          debugPrint("⚠️ Unknown message type: $type");
       }
     } catch (e) {
-      print("⚠️ Errore parsing JSON: $e");
-      print("   Line: $line");
+      debugPrint("⚠️ Errore parsing JSON: $e");
+      debugPrint("   Line: $line");
     }
   }
 
@@ -214,7 +214,7 @@ class LeonardoService extends ChangeNotifier {
   // ACKNOWLEDGE ADVICE (sblocca Python)
   // ============================================
   void acknowledgeAdvice() {
-    print("✅ User acknowledged advice");
+    debugPrint("✅ User acknowledged advice");
     _process?.stdin.writeln('START'); 
     isAdviceAcknowledged = true;
     notifyListeners();
@@ -224,7 +224,7 @@ class LeonardoService extends ChangeNotifier {
   // STOP SESSION
   // ============================================
   Future<void> stopSession() async {
-    print("🛑 Invio segnale di stop a Python...");
+    debugPrint("🛑 Invio segnale di stop a Python...");
     _process?.stdin.writeln('STOP');
     
     // Aspetta un po' per permettere a Python di generare il report
@@ -235,7 +235,7 @@ class LeonardoService extends ChangeNotifier {
   // RESET (nuova sessione)
   // ============================================
   void reset() {
-    print("🔄 Resetting application state...");
+    debugPrint("🔄 Resetting application state...");
     
     // Report e stats
     finalReport = null;

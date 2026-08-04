@@ -339,7 +339,7 @@ class RunningView extends StatelessWidget {
           height: size,
           errorBuilder: (context, error, stackTrace) {
              // Se l'immagine specifica non esiste, torna a Leo ma mantieni il bordo colorato!
-             print("⚠️ Immagine mancante per: ${leonardo.emotion} (cercavo $asset)");
+             debugPrint("⚠️ Immagine mancante per: ${leonardo.emotion} (cercavo $asset)");
              return Image.asset('assets/leo.png', fit: BoxFit.cover);
           },
         ),

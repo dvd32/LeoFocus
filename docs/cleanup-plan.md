@@ -190,49 +190,45 @@ comportamento dell'app.
 - [x] CI GitHub Actions con `flutter analyze` + `ruff check`, se il repo
       resta mantenuto attivamente.
 
-## 🔑 Verifiche possibili solo con una GROQ_API_KEY viva
+## ✅ Verifiche dello strato LLM — FATTE (2026-08-04, con chiave viva)
 
-Tutto lo strato LLM del backend non è mai stato eseguito durante la pulizia:
-è stato verificato solo il suo percorso di fallimento (senza chiave Leonardo
-"medita"). Con una chiave nell'ambiente si sbloccano queste verifiche, in
-ordine di rischio.
+Tutte eseguite chiamando le funzioni in isolamento, senza avviare una sessione
+(che richiederebbe anche i permessi di accessibilità macOS).
 
-**Non serve avviare una sessione vera**: `create_json_memory` e
-`generate_final_report_from_memory` si possono chiamare in isolamento con
-input sintetici. Una sessione completa richiederebbe anche i permessi di
-accessibilità macOS per `pynput` e 30+ secondi di tempo reale, che la chiave
-da sola non risolve.
+- [x] **🟢 `llama-3.1-8b-instant` è ancora servito da Groq.** Il rischio più
+      grosso del piano **non si è materializzato**. Modelli disponibili oggi
+      per un eventuale upgrade: `llama-3.3-70b-versatile`,
+      `openai/gpt-oss-20b`/`120b`, `qwen/qwen3.6-27b`, `groq/compound`.
+- [x] **🔴 Il modello ignora "OUTPUT FORMAT (JSON ONLY)" — sempre.** In 4
+      chiamate su 4 antepone una frase in prosa (*"Mio caro studente, ..."*)
+      prima del JSON. Quindi `find('{')`/`rfind('}')` **non è codice
+      difensivo: è sul percorso normale**. Estratto in
+      `extract_json_object()` e coperto da `test_llm_client.py`, costruito su
+      risposte reali catturate. Restituire `None` ora significa
+      inequivocabilmente "fallito", il che rende *corretto* — e non casuale —
+      il fallback del chiamante sul contesto precedente.
+- [x] **Il `focus_score` torna esattamente come iniettato**, in tutti gli
+      scenari (distrazione 5%, 30%, 80%). Il "math override" in `trackers.py`
+      resta una cintura di sicurezza, non una correzione abituale.
+- [x] **La rimozione di `leonardo_emotion` funziona**: il modello ora
+      restituisce solo `focus_score`, `summary_so_far`, `leonardo_comment`.
+- [x] **Il report finale contiene tutti i costrutti che `report_view.dart`
+      stila**: h1, h2, tabella con pipe, blockquote, liste, righe orizzontali.
+      ~300 parole, dentro il limite di 400 chiesto dal prompt.
 
-- [ ] **🔴 Il modello `llama-3.1-8b-instant` esiste ancora su Groq?**
-      (`llm_client.py:32`). Groq dismette i modelli con un certo ritmo e il
-      progetto è fermo da mesi. Se è stato deprecato **l'app è già rotta in
-      produzione** e nessuno se ne è accorto, perché ogni chiamata fallisce
-      dentro un `try` che degrada silenziosamente. È la verifica a più alto
-      valore di tutte.
-- [ ] **🔴 `create_json_memory` riesce davvero a estrarre il JSON?**
-      Usa `response.find('{')` / `rfind('}')` sulla risposta grezza
-      (`llm_client.py:96-105`). Se il modello incapsula in un blocco ```json
-      o aggiunge testo prima/dopo, il parsing può rompersi — e in caso di
-      fallimento la funzione **restituisce il contesto precedente senza
-      segnalare nulla**, quindi la sessione prosegue con dati stantii senza
-      che l'utente lo veda.
-- [ ] **🟡 `generate_final_report_from_memory` produce il Markdown atteso?**
-      Il prompt chiede una struttura precisa (tabella Performance Matrix,
-      sezioni, blockquote). `report_view.dart` la stila con uno
-      `MarkdownStyleSheet` costruito su misura per quella struttura. Se il
-      modello devia, il report si vede male e nessun test lo intercetta.
-- [ ] **🟡 L'LLM rispetta il `focus_score` che gli viene passato?**
-      Python calcola `int(100 - global_distraction)` e lo inietta nel prompt
-      come letterale, poi lo richiede indietro nel JSON, poi in `trackers.py`
-      lo ricorregge con il "math override" — ma solo **verso il basso**
-      (`if llm_score > max_allowed_score`). Se il modello restituisce un
-      valore più basso, quello passa. Andrebbe capito se succede.
-- [ ] **🟢 Catturare una risposta reale e scriverci un test offline.**
-      È il vero guadagno: con una risposta vera salvata come fixture si può
-      testare il parsing di `create_json_memory` **senza chiave**, quindi
-      anche in CI. Oggi quel parser non è coperto da niente.
+### Configurazione — FATTA
 
-### Pulizia già identificata su questo strato
+- [x] `.env` aggiunto al `.gitignore` (con negazione per `.env.example`).
+- [x] `LLM_API_KEY` letta via `python-dotenv`, caricata esplicitamente dalla
+      radice del repo perché Flutter avvia il backend con
+      `cwd=leonardo_backend/trackers`. L'ambiente vince sul file.
+- [x] `.env.example` committato.
+- ℹ️ Nel `.env` il formato è `LLM_API_KEY = valore` (con spazi):
+      `python-dotenv` lo gestisce, ma un `source .env` da shell **no**
+      (bash non ammette spazi attorno a `=`). Se volete che funzionino
+      entrambi, togliete gli spazi.
+
+### Pulizia su questo strato
 
 - [x] ~~Il prompt chiede `leonardo_emotion` e nessuno lo legge~~ — **fatto**.
       Il campo e l'istruzione di classificazione sono usciti dal prompt.
@@ -272,37 +268,22 @@ utenti invece che a voi):
       vLLM, **Ollama e LM Studio in locale**. Restano fuori Anthropic e
       Gemini, che hanno API di forma diversa (Gemini ha comunque un endpoint
       compatibile).
-- [ ] **🟡 Rendere robusto il parsing JSON**, vedi la sezione 🔑 sopra. Con
-      provider arbitrari `find('{')`/`rfind('}')` non basta più: serve
-      `response_format={"type":"json_object"}` dove supportato e un fallback
-      che *segnali* il problema invece di restituire il contesto stantio.
+- [ ] **🟡 Rendere robusto il parsing JSON.** Metà fatta:
+      `extract_json_object()` è isolata e testata, e il caso "blocco ```json"
+      è già coperto. Resta da aggiungere
+      `response_format={"type":"json_object"}` dove il provider lo supporta, e
+      da decidere se **segnalare** il fallimento alla UI invece di proseguire
+      in silenzio col contesto precedente.
 - [ ] **🟢 I prompt sono tarati su un modello piccolo e veloce**
       ("max 3 sentences", "a few words long"). Su modelli grandi vanno bene,
       su modelli minuscoli no. Da verificare quando aprite il ventaglio.
 
-### Configurazione: nomi delle variabili e `.env`
+### Configurazione — ✅ FATTA
 
-- [ ] **🔴 `.env` NON è coperto dal `.gitignore`.** C'è `env/`, che matcha solo
-      la cartella del virtualenv: un file `.env` con dentro la chiave
-      **verrebbe tracciato da git**. Va aggiunto `.env` (e `.env.local`)
-      prima che qualcuno ce la metta.
-- [ ] **Nessuno carica `.env` oggi**: non c'è `python-dotenv` né una
-      `load_dotenv()`. Un `.env` nel repo non farebbe nulla — o si aggiunge
-      la dipendenza, o si esporta la variabile nella shell.
-- [ ] Committare un **`.env.example`** con le chiavi vuote, così chi clona sa
-      cosa serve senza indovinare.
-- **Nomi consigliati.** Finché il client è Groq, tenere `GROQ_API_KEY`: è
-  quello che il codice legge ed è anche il nome che l'SDK Groq riconosce da
-  solo. Quando generalizzate, passare alla terna neutra
-  `LLM_API_KEY` / `LLM_BASE_URL` / `LLM_MODEL` — non legare il nome della
-  variabile a un fornitore che volete smettere di imporre.
-
-### Se decidete di darmi una chiave
-
-Conviene generarne una **usa e getta** e revocarla dopo: passerebbe comunque
-nel mio contesto, e per quanto non la scriva da nessuna parte è più pulito
-trattarla come esposta. Il costo delle verifiche è trascurabile (Groq ha un
-free tier, servono ~5 chiamate).
+Il nome scelto è già quello neutro: **`LLM_API_KEY`**. Quando generalizzerete
+il client basterà affiancargli `LLM_BASE_URL` e `LLM_MODEL`, senza rinominare
+nulla e senza legare la variabile a un fornitore che volete smettere di
+imporre. Dettagli nella sezione "Configurazione — FATTA" più sopra.
 
 ## Cosa resta da fare
 
@@ -316,8 +297,8 @@ free tier, servono ~5 chiamate).
 3. Verificare che la **CI passi davvero** al primo push: il workflow è
    scritto e i comandi girano in locale, ma i runner GitHub non li ho
    potuti riprodurre.
-4. **Controllare che il modello Groq non sia stato deprecato** — vedi la
-   sezione 🔑 sopra. Se lo è, l'app è rotta e il fallimento è silenzioso.
+4. ~~Controllare che il modello Groq non sia stato deprecato~~ ✅ verificato:
+   `llama-3.1-8b-instant` è ancora servito.
 5. Decidere su `frontend/assets/leo_quadrato.png` (927KB, non referenziato,
    attualmente non tracciato da git).
 6. Le voci ⬜ rimaste sopra, tutte opzionali.

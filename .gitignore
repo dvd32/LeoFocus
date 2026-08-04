@@ -1,3 +1,9 @@
+# Secrets - NEVER COMMIT THESE
+# (nota: 'env/' sotto matcha solo la cartella del virtualenv, non il file .env)
+.env
+.env.*
+!.env.example
+
 # Python
 __pycache__/
 *.py[cod]

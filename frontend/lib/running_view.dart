@@ -332,25 +332,17 @@ class RunningView extends StatelessWidget {
     String asset;
     Color borderColor;
 
-    // Gestione estesa delle emozioni
+    // Le uniche emozioni che trackers.py emette sono 'angry' e 'happy';
+    // qualsiasi altro valore ricade sul Leonardo neutro.
     switch (leonardo.emotion) {
-      //case 'joy':
       case 'happy':
         asset = 'assets/happy.png';
         borderColor = LeonardoTheme.success;
         break;
-      //case 'frustrated':
       case 'angry':
         asset = 'assets/angry.png';
         borderColor = LeonardoTheme.failure;
         break;
-      //case 'worried':
-      /*case 'sad':
-        asset = 'assets/worried.png'; 
-        borderColor = Colors.orange;
-        break;*/
-      //case 'puzzled':
-      //case 'neutral':
       default:
         asset = 'assets/leo.png';
         borderColor = LeonardoTheme.accent;

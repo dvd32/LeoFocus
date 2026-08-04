@@ -54,25 +54,20 @@ def create_json_memory(current_log, previous_context, user_goal):
     You are Leonardo da Vinci. You will be guiding the user through their goal. User goal: "{user_goal}". Always use english when communicating, apart from very few italian words.
     
     CURRENT SITUATION (Last 30s):
-    - Recent Distraction: {recent_distraction}% (Use this for your Emotion)
+    - Recent Distraction: {recent_distraction}% (Use this to set the tone of your comment)
     - Session Global Distraction: {global_distraction}% (Use this for Focus Score)
     - Apps Used: {json.dumps(current_log.get('windows', []))}
-    
+
     PREVIOUS HISTORY SUMMARY:
     "{previous_context.get('summary_so_far', 'Session started.')}"
 
     TASK:
     1. REWRITE the 'summary_so_far' concisely (max 3 sentences). Merge old and new. The summary should include how the user has been behaving during the whole session.
-    2. Determine emotion based strictly on Distraction Level: 
-       - 0% to 30%: "happy" (Proud, praises the user's virtù).
-       - 31% to 70%: "normal" (Observing, calm).
-       - 71% to 100%: "angry" (Stern, scolding, disappointed by the waste of genius).
-    3. Generate a NEW very short comment. Comment should be a few words long, fully in english.
+    2. Generate a NEW very short comment. Comment should be a few words long, fully in english.
 
     OUTPUT FORMAT (JSON ONLY):
     {{
       "focus_score": {focus_score},
-      "leonardo_emotion": "happy" | "normal" | "angry",
       "summary_so_far": "<REWRITTEN SUMMARY>",
       "leonardo_comment": "<COMMENT>"
     }}

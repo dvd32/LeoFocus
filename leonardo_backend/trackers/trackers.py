@@ -568,8 +568,9 @@ def report_loop_json():
                 memory_context = new_memory
                 activity_state["memory_context"] = memory_context 
                 
-                # Determina emozione basata sui DATI REALI, non sull'LLM
-                # Determina emozione basata sui DATI REALI, non sull'LLM
+                # Determina emozione basata sui DATI REALI, non sull'LLM.
+                # Solo 'angry' e 'happy' hanno un asset in running_view.dart:
+                # ogni altro valore ricadrebbe comunque nel default neutro.
                 current_emotion = 'neutral'
                 current_score = memory_context.get('focus_score', 100)
                 
@@ -603,8 +604,6 @@ def report_loop_json():
                         last_scold_time = now
                     # -------------------------------
 
-                elif current_score < 60:
-                    current_emotion = 'worried'
                 elif current_score > 85:
                     current_emotion = 'happy'
 

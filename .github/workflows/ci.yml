@@ -32,5 +32,8 @@ jobs:
       # pynput picks its backend at import time and needs a display on Linux,
       # so even these pure-logic tests have to run under a virtual one.
       - run: sudo apt-get update && sudo apt-get install -y xvfb
+      # Nessuno di questi test tocca la rete: girano senza LLM_API_KEY.
       - run: xvfb-run -a python test_trackers.py
+        working-directory: leonardo_backend/trackers
+      - run: python test_llm_client.py
         working-directory: leonardo_backend/trackers

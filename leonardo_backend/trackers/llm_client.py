@@ -1,6 +1,14 @@
 import os
 import json
 import sys
+from pathlib import Path
+
+from dotenv import load_dotenv
+
+# Flutter avvia il backend con cwd=leonardo_backend/trackers, quindi il .env
+# alla radice del repo va indicato esplicitamente. Le variabili già presenti
+# nell'ambiente vincono su quelle del file.
+load_dotenv(Path(__file__).resolve().parents[2] / ".env")
 
 _client = None
 
@@ -17,14 +25,36 @@ def get_groq_llm():
 
     global _client
     if _client is None:
-        api_key = os.getenv("GROQ_API_KEY")
+        api_key = os.getenv("LLM_API_KEY")
         if not api_key:
             raise ValueError(
-                "Get free API key from https://console.groq.com/keys\n"
-                "Then: export GROQ_API_KEY='your-key'"
+                "Set LLM_API_KEY, either in the .env at the repo root or in "
+                "the environment.\n"
+                "Free Groq key: https://console.groq.com/keys"
             )
         _client = Groq(api_key=api_key)
     return _client
+
+
+def extract_json_object(response: str):
+    """Pull the JSON object out of an LLM reply, or None if there isn't one.
+
+    Non è codice difensivo: llama-3.1-8b-instant ignora sistematicamente
+    l'istruzione "JSON ONLY" e antepone una frase in prosa ("Mio caro
+    studente, ..."), quindi questa estrazione è sul percorso normale, non su
+    quello d'errore. Coperta da test_llm_client.py.
+    """
+    if not response:
+        return None
+    start = response.find('{')
+    end = response.rfind('}') + 1
+    if start == -1 or end <= start:
+        return None
+    try:
+        parsed = json.loads(response[start:end])
+    except ValueError:
+        return None
+    return parsed if isinstance(parsed, dict) else None
 
 
 def ask_llm(prompt: str, max_tokens: int = 100, temperature: float = 0.2):
@@ -79,17 +109,12 @@ def create_json_memory(current_log, previous_context, user_goal):
     print("="*50 + "\n", file=sys.stderr)
 
     response = ask_llm(prompt, max_tokens=350)
-    
-    try:
-        start = response.find('{')
-        end = response.rfind('}') + 1
-        if start != -1 and end != -1:
-            return json.loads(response[start:end])
-        else:
-            return json.loads(response)
-    except Exception as e:
-        print(f"JSON Parsing failed: {e}", file=sys.stderr)
+
+    parsed = extract_json_object(response)
+    if parsed is None:
+        print("JSON Parsing failed, keeping previous context", file=sys.stderr)
         return previous_context
+    return parsed
 
 # ============================================
 # Generating the final report using json memory

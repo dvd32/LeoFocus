@@ -142,19 +142,18 @@ The Windows-only packages in that file install themselves only on Windows.
 
 The reasoning engine runs on **Groq** — free, and fast enough to keep the
 30-second feedback loop responsive. Get a key at
-[console.groq.com/keys](https://console.groq.com/keys), then:
+[console.groq.com/keys](https://console.groq.com/keys), then copy the example
+env file and paste it in:
 
 ```bash
-export GROQ_API_KEY="your_key_here"
+cp .env.example .env
 ```
 
-Windows:
+`.env` is gitignored, so your key never leaves your machine. If you prefer,
+export `LLM_API_KEY` in your shell instead — the environment wins over the
+file.
 
-```powershell
-setx GROQ_API_KEY "your_key_here"
-```
-
-Without the key the app still starts and tracks activity — Leonardo just
+Without a key the app still starts and tracks activity; Leonardo simply
 reports that he is "currently meditating" instead of commenting.
 
 ---
@@ -199,10 +198,16 @@ leofocus/
 │   └── trackers/
 │       ├── trackers.py            # activity tracking + session loop
 │       ├── llm_client.py          # Groq client, memory and final report
-│       └── local_summarizer.py    # pre-session advice
+│       ├── local_summarizer.py    # pre-session advice
+│       └── test_*.py              # offline self-checks, no key needed
+├── .env.example
 ├── requirements.txt
 └── README.md
 ```
+
+Run the checks with `flutter test` in `frontend/`, and
+`python3 test_trackers.py && python3 test_llm_client.py` in
+`leonardo_backend/trackers/`.
 
 ---
 

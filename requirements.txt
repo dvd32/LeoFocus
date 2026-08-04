@@ -1,5 +1,6 @@
-# LLM client (Groq API) - needs GROQ_API_KEY in the environment
+# LLM client (Groq API) - needs LLM_API_KEY, see .env.example
 groq>=0.11.0
+python-dotenv>=1.0.0
 
 # Activity tracking
 pynput>=1.7.6

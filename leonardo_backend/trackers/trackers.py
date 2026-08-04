@@ -8,7 +8,7 @@ import subprocess
 from collections import Counter
 import tkinter as tk
 from tkinter import messagebox
-from local_summarizer import summarize_activity_with_llm, get_start_session_advice
+from local_summarizer import get_start_session_advice
 from llm_client_2 import create_json_memory, generate_final_report_from_memory
 
 # FORCE UTF-8 ON WINDOWS

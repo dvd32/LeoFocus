@@ -53,7 +53,7 @@ class RunningView extends StatelessWidget {
                       
                       // Divisore sottile per separare visivamente l'area timer
                       Divider(
-                        color: LeonardoTheme.inkLight.withOpacity(0.1),
+                        color: LeonardoTheme.inkLight.withValues(alpha: 0.1),
                         height: 32,
                         thickness: 1,
                       ),
@@ -65,7 +65,7 @@ class RunningView extends StatelessWidget {
                           Container(
                             padding: const EdgeInsets.all(10),
                             decoration: BoxDecoration(
-                              color: LeonardoTheme.accent.withOpacity(0.1),
+                              color: LeonardoTheme.accent.withValues(alpha: 0.1),
                               borderRadius: BorderRadius.circular(12),
                             ),
                             child: const Icon(Icons.timer_outlined, 
@@ -141,7 +141,7 @@ class RunningView extends StatelessWidget {
                             : ListView.separated(
                                 itemCount: leonardo.topApps.length,
                                 separatorBuilder: (c, i) => Divider(
-                                  color: LeonardoTheme.inkLight.withOpacity(0.1),
+                                  color: LeonardoTheme.inkLight.withValues(alpha: 0.1),
                                   height: 24,
                                 ),
                                 itemBuilder: (ctx, index) {
@@ -158,8 +158,8 @@ class RunningView extends StatelessWidget {
                                         decoration: BoxDecoration(
                                           gradient: LinearGradient(
                                             colors: [
-                                              LeonardoTheme.accent.withOpacity(0.8),
-                                              LeonardoTheme.accent.withOpacity(0.6),
+                                              LeonardoTheme.accent.withValues(alpha: 0.8),
+                                              LeonardoTheme.accent.withValues(alpha: 0.6),
                                             ],
                                           ),
                                           borderRadius: BorderRadius.circular(10),
@@ -196,7 +196,7 @@ class RunningView extends StatelessWidget {
                                                 minHeight: 4,
                                                 backgroundColor: Colors.grey.shade200,
                                                 valueColor: AlwaysStoppedAnimation(
-                                                  LeonardoTheme.accent.withOpacity(0.7),
+                                                  LeonardoTheme.accent.withValues(alpha: 0.7),
                                                 ),
                                               ),
                                             ),
@@ -324,7 +324,7 @@ class RunningView extends StatelessWidget {
         color: Colors.white,
         boxShadow: [
           BoxShadow(
-            color: borderColor.withOpacity(0.4), // Ombra più forte per vedere il cambio colore
+            color: borderColor.withValues(alpha: 0.4), // Ombra più forte per vedere il cambio colore
             blurRadius: 20,
             spreadRadius: 5,
           ),

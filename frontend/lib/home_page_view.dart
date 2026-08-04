@@ -7,7 +7,6 @@ import 'report_view.dart';
 import 'running_view.dart';
 import 'theme.dart';
 import 'widgets/glass_card_widget.dart';
-import 'dart:ui';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -59,12 +58,12 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
                   Positioned(
                     top: -150 + (50 * _orbController.value),
                     right: -100,
-                    child: _buildOrb(450, LeonardoTheme.accent.withOpacity(0.08)),
+                    child: _buildOrb(450, LeonardoTheme.accent.withValues(alpha: 0.08)),
                   ),
                   Positioned(
                     bottom: -100 + (30 * (1 - _orbController.value)),
                     left: -80,
-                    child: _buildOrb(380, LeonardoTheme.gold.withOpacity(0.06)),
+                    child: _buildOrb(380, LeonardoTheme.gold.withValues(alpha: 0.06)),
                   ),
                 ],
               );
@@ -124,7 +123,7 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
       decoration: BoxDecoration(
         shape: BoxShape.circle,
         gradient: RadialGradient(
-          colors: [color, color.withOpacity(0)],
+          colors: [color, color.withValues(alpha: 0)],
           stops: const [0.0, 1.0],
         ),
       ),
@@ -263,12 +262,12 @@ Widget _buildHeader(BuildContext context, LeonardoService leonardo) {
                         ),
                         boxShadow: [
                           BoxShadow(
-                            color: Colors.black.withOpacity(0.05),
+                            color: Colors.black.withValues(alpha: 0.05),
                             blurRadius: 15,
                             offset: const Offset(4, 4),
                           ),
                         ],
-                        border: Border.all(color: LeonardoTheme.inkLight.withOpacity(0.1)),
+                        border: Border.all(color: LeonardoTheme.inkLight.withValues(alpha: 0.1)),
                       ),
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
@@ -314,7 +313,7 @@ Widget _buildHeader(BuildContext context, LeonardoService leonardo) {
                         hintText: "e.g., Studying Calculus, Coding a Flutter app...",
                         prefixIcon: const Icon(Icons.psychology_outlined),
                         filled: true,
-                        fillColor: Colors.white.withOpacity(0.5),
+                        fillColor: Colors.white.withValues(alpha: 0.5),
                       ),
                       onSubmitted: (value) {
                         if (value.isNotEmpty) {
@@ -372,8 +371,8 @@ Widget _buildHeader(BuildContext context, LeonardoService leonardo) {
                   width: double.infinity,
                   padding: const EdgeInsets.symmetric(vertical: 16),
                   decoration: BoxDecoration(
-                    color: LeonardoTheme.accent.withOpacity(0.1),
-                    border: Border(bottom: BorderSide(color: LeonardoTheme.accent.withOpacity(0.1))),
+                    color: LeonardoTheme.accent.withValues(alpha: 0.1),
+                    border: Border(bottom: BorderSide(color: LeonardoTheme.accent.withValues(alpha: 0.1))),
                   ),
                   child: Text(
                     "LEONARDO'S PRECEPTS",
@@ -426,7 +425,7 @@ Widget _buildHeader(BuildContext context, LeonardoService leonardo) {
               backgroundColor: LeonardoTheme.accent,
               padding: const EdgeInsets.symmetric(vertical: 20),
               elevation: 4,
-              shadowColor: LeonardoTheme.accent.withOpacity(0.4),
+              shadowColor: LeonardoTheme.accent.withValues(alpha: 0.4),
             ),
             onPressed: () => leonardo.acknowledgeAdvice(),
             child: Row(
@@ -467,7 +466,7 @@ Widget _buildHeader(BuildContext context, LeonardoService leonardo) {
         color: Colors.white,
         boxShadow: [
           BoxShadow(
-            color: statusColor.withOpacity(0.2),
+            color: statusColor.withValues(alpha: 0.2),
             blurRadius: 12,
             spreadRadius: 2,
           ),

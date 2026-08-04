@@ -50,7 +50,7 @@ class LeonardoTheme {
 
       inputDecorationTheme: InputDecorationTheme(
         filled: true,
-        fillColor: Colors.white.withOpacity(0.5),
+        fillColor: Colors.white.withValues(alpha: 0.5),
         contentPadding: const EdgeInsets.symmetric(horizontal: 20, vertical: 18),
         border: OutlineInputBorder(
           borderRadius: BorderRadius.circular(16),
@@ -58,14 +58,14 @@ class LeonardoTheme {
         ),
         enabledBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(16),
-          borderSide: BorderSide(color: inkLight.withOpacity(0.1), width: 1),
+          borderSide: BorderSide(color: inkLight.withValues(alpha: 0.1), width: 1),
         ),
         focusedBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(16),
           borderSide: BorderSide(color: accent, width: 2),
         ),
         hintStyle: GoogleFonts.inter(
-          color: inkLight.withOpacity(0.5),
+          color: inkLight.withValues(alpha: 0.5),
           fontSize: 14,
         ),
         prefixIconColor: inkLight,
@@ -91,10 +91,10 @@ class LeonardoTheme {
           overlayColor: WidgetStateProperty.resolveWith<Color?>(
             (Set<WidgetState> states) {
               if (states.contains(WidgetState.pressed)) {
-                return Colors.white.withOpacity(0.2);
+                return Colors.white.withValues(alpha: 0.2);
               }
               if (states.contains(WidgetState.hovered)) {
-                return Colors.white.withOpacity(0.1);
+                return Colors.white.withValues(alpha: 0.1);
               }
               return null;
             },
@@ -103,7 +103,7 @@ class LeonardoTheme {
       ),
 
       dividerTheme: DividerThemeData(
-        color: inkLight.withOpacity(0.1),
+        color: inkLight.withValues(alpha: 0.1),
         thickness: 1,
       ),
 

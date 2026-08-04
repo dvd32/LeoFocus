@@ -78,9 +78,9 @@ class _ReportViewState extends State<ReportView> with SingleTickerProviderStateM
                                 begin: Alignment.topLeft,
                                 end: Alignment.bottomRight,
                                 colors: [
-                                  LeonardoTheme.surface.withOpacity(0.98),
-                                  LeonardoTheme.gold.withOpacity(0.03 + 0.02 * math.sin(_shimmerController.value * 2 * math.pi)),
-                                  LeonardoTheme.accent.withOpacity(0.02),
+                                  LeonardoTheme.surface.withValues(alpha: 0.98),
+                                  LeonardoTheme.gold.withValues(alpha: 0.03 + 0.02 * math.sin(_shimmerController.value * 2 * math.pi)),
+                                  LeonardoTheme.accent.withValues(alpha: 0.02),
                                 ],
                               ),
                             ),
@@ -221,14 +221,14 @@ class _ReportViewState extends State<ReportView> with SingleTickerProviderStateM
         h3: GoogleFonts.inter(
           fontSize: 16,
           fontWeight: FontWeight.bold,
-          color: LeonardoTheme.ink.withOpacity(0.9),
+          color: LeonardoTheme.ink.withValues(alpha: 0.9),
         ),
         
         // Body text ottimizzato per leggibilità
         p: GoogleFonts.inter(
           fontSize: 15,
           height: 1.7,
-          color: LeonardoTheme.ink.withOpacity(0.85),
+          color: LeonardoTheme.ink.withValues(alpha: 0.85),
           letterSpacing: 0.2,
         ),
         
@@ -254,18 +254,18 @@ class _ReportViewState extends State<ReportView> with SingleTickerProviderStateM
         ),
         tableBody: GoogleFonts.inter(
           fontSize: 15,
-          color: LeonardoTheme.ink.withOpacity(0.9),
+          color: LeonardoTheme.ink.withValues(alpha: 0.9),
           height: 1.6,
         ),
         tableBorder: TableBorder.all(
-          color: LeonardoTheme.ink.withOpacity(0.1),
+          color: LeonardoTheme.ink.withValues(alpha: 0.1),
           width: 1,
         ),
         tableCellsPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
         
         // Quote Leonardo-style
         blockquote: GoogleFonts.crimsonText(
-          color: LeonardoTheme.ink.withOpacity(0.8),
+          color: LeonardoTheme.ink.withValues(alpha: 0.8),
           fontStyle: FontStyle.italic,
           fontSize: 16,
           height: 1.7,
@@ -278,8 +278,8 @@ class _ReportViewState extends State<ReportView> with SingleTickerProviderStateM
           ),
           gradient: LinearGradient(
             colors: [
-              LeonardoTheme.gold.withOpacity(0.08),
-              LeonardoTheme.gold.withOpacity(0.02),
+              LeonardoTheme.gold.withValues(alpha: 0.08),
+              LeonardoTheme.gold.withValues(alpha: 0.02),
             ],
           ),
           borderRadius: const BorderRadius.only(
@@ -295,9 +295,9 @@ class _ReportViewState extends State<ReportView> with SingleTickerProviderStateM
           color: LeonardoTheme.accent,
         ),
         codeblockDecoration: BoxDecoration(
-          color: LeonardoTheme.ink.withOpacity(0.04),
+          color: LeonardoTheme.ink.withValues(alpha: 0.04),
           borderRadius: BorderRadius.circular(12),
-          border: Border.all(color: LeonardoTheme.ink.withOpacity(0.08), width: 1),
+          border: Border.all(color: LeonardoTheme.ink.withValues(alpha: 0.08), width: 1),
         ),
         codeblockPadding: const EdgeInsets.all(16),
         
@@ -305,7 +305,7 @@ class _ReportViewState extends State<ReportView> with SingleTickerProviderStateM
         horizontalRuleDecoration: BoxDecoration(
           border: Border(
             top: BorderSide(
-              color: LeonardoTheme.gold.withOpacity(0.3),
+              color: LeonardoTheme.gold.withValues(alpha: 0.3),
               width: 2,
             ),
           ),
@@ -333,13 +333,13 @@ class _ReportViewState extends State<ReportView> with SingleTickerProviderStateM
             child: Container(
               padding: const EdgeInsets.all(24),
               decoration: BoxDecoration(
-                color: LeonardoTheme.gold.withOpacity(0.1),
+                color: LeonardoTheme.gold.withValues(alpha: 0.1),
                 shape: BoxShape.circle,
               ),
               child: Icon(
                 Icons.description_outlined,
                 size: 56,
-                color: LeonardoTheme.gold.withOpacity(0.6),
+                color: LeonardoTheme.gold.withValues(alpha: 0.6),
               ),
             ),
           ),
@@ -349,7 +349,7 @@ class _ReportViewState extends State<ReportView> with SingleTickerProviderStateM
             style: GoogleFonts.cinzel(
               fontSize: 20,
               fontWeight: FontWeight.w600,
-              color: LeonardoTheme.ink.withOpacity(0.5),
+              color: LeonardoTheme.ink.withValues(alpha: 0.5),
             ),
           ),
           const SizedBox(height: 8),
@@ -357,7 +357,7 @@ class _ReportViewState extends State<ReportView> with SingleTickerProviderStateM
             "Completa una sessione per generare il report",
             style: GoogleFonts.inter(
               fontSize: 14,
-              color: LeonardoTheme.ink.withOpacity(0.4),
+              color: LeonardoTheme.ink.withValues(alpha: 0.4),
             ),
           ),
         ],
@@ -384,12 +384,12 @@ class _ReportViewState extends State<ReportView> with SingleTickerProviderStateM
             backgroundColor: LeonardoTheme.accent,
             foregroundColor: Colors.white,
             elevation: 12,
-            shadowColor: LeonardoTheme.accent.withOpacity(0.5),
+            shadowColor: LeonardoTheme.accent.withValues(alpha: 0.5),
             shape: RoundedRectangleBorder(
               borderRadius: BorderRadius.circular(20),
             ),
           ).copyWith(
-            overlayColor: WidgetStateProperty.all(Colors.white.withOpacity(0.2)),
+            overlayColor: WidgetStateProperty.all(Colors.white.withValues(alpha: 0.2)),
           ),
           onPressed: () {
             HapticFeedback.mediumImpact();
@@ -480,10 +480,10 @@ class _QuickStatCard extends StatelessWidget {
       decoration: BoxDecoration(
         color: LeonardoTheme.surface,
         borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: color.withOpacity(0.3), width: 2),
+        border: Border.all(color: color.withValues(alpha: 0.3), width: 2),
         boxShadow: [
           BoxShadow(
-            color: color.withOpacity(0.1),
+            color: color.withValues(alpha: 0.1),
             blurRadius: 12,
             offset: const Offset(0, 4),
           ),
@@ -512,7 +512,7 @@ class _QuickStatCard extends StatelessWidget {
                   suffix,
                   style: GoogleFonts.inter(
                     fontSize: 12,
-                    color: LeonardoTheme.ink.withOpacity(0.5),
+                    color: LeonardoTheme.ink.withValues(alpha: 0.5),
                   ),
                 ),
             ],
@@ -522,7 +522,7 @@ class _QuickStatCard extends StatelessWidget {
             label,
             style: GoogleFonts.inter(
               fontSize: 11,
-              color: LeonardoTheme.ink.withOpacity(0.6),
+              color: LeonardoTheme.ink.withValues(alpha: 0.6),
               fontWeight: FontWeight.w500,
               letterSpacing: 0.5,
             ),
@@ -557,14 +557,14 @@ class _ActionButton extends StatelessWidget {
           child: Container(
             padding: const EdgeInsets.all(12),
             decoration: BoxDecoration(
-              color: LeonardoTheme.surface.withOpacity(0.9),
+              color: LeonardoTheme.surface.withValues(alpha: 0.9),
               borderRadius: BorderRadius.circular(12),
               border: Border.all(
-                color: LeonardoTheme.ink.withOpacity(0.1),
+                color: LeonardoTheme.ink.withValues(alpha: 0.1),
               ),
               boxShadow: [
                 BoxShadow(
-                  color: Colors.black.withOpacity(0.08),
+                  color: Colors.black.withValues(alpha: 0.08),
                   blurRadius: 12,
                   offset: const Offset(0, 4),
                 ),
@@ -573,7 +573,7 @@ class _ActionButton extends StatelessWidget {
             child: Icon(
               icon,
               size: 20,
-              color: LeonardoTheme.ink.withOpacity(0.7),
+              color: LeonardoTheme.ink.withValues(alpha: 0.7),
             ),
           ),
         ),

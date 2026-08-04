@@ -1,6 +1,5 @@
-# LLM client (Groq API)
+# LLM client (Groq API) - needs GROQ_API_KEY in the environment
 groq>=0.11.0
-requests>=2.31.0
 
 # Core LLM dependencies (Pure Python - No C++ compiler needed!)
 transformers>=4.35.0

@@ -1,11 +1,12 @@
 import os
-import requests
 import json
 import sys
 
 _client = None
+
+
 # ============================================
-# OPTION 1: Groq (FREE, very fast!)
+# Groq client (FREE, very fast!)
 # ============================================
 def get_groq_llm():
     """Initialize Groq client (FREE API, very fast)"""
@@ -13,9 +14,8 @@ def get_groq_llm():
         from groq import Groq
     except ImportError:
         raise ImportError("Install: pip install groq")
-    
+
     global _client
-    _client = Groq(api_key="") # use your desired API key here
     if _client is None:
         api_key = os.getenv("GROQ_API_KEY")
         if not api_key:
@@ -26,7 +26,8 @@ def get_groq_llm():
         _client = Groq(api_key=api_key)
     return _client
 
-def ask_llm_groq(prompt: str, max_tokens: int = 100, temperature: float = 0.2):
+
+def ask_llm(prompt: str, max_tokens: int = 100, temperature: float = 0.2):
     """Groq - FREE and lightning fast!"""
     client = get_groq_llm()
     response = client.chat.completions.create(
@@ -36,79 +37,6 @@ def ask_llm_groq(prompt: str, max_tokens: int = 100, temperature: float = 0.2):
         temperature=temperature
     )
     return response.choices[0].message.content.strip()
-
-
-# ============================================
-# OPTION 2: Hugging Face Inference API (FREE)
-# ============================================
-def ask_llm_huggingface(prompt: str, max_tokens: int = 100, temperature: float = 0.2):
-    """Hugging Face - FREE but slower"""
-    api_key = os.getenv("HF_API_KEY")
-    if not api_key:
-        raise ValueError(
-            "Get free API key from https://huggingface.co/settings/tokens\n"
-            "Then: export HF_API_KEY='your-key'"
-        )
-    
-    API_URL = "https://api-inference.huggingface.co/models/meta-llama/Llama-3.2-3B-Instruct"
-    headers = {"Authorization": f"Bearer {api_key}"}
-    
-    response = requests.post(
-        API_URL,
-        headers=headers,
-        json={
-            "inputs": prompt,
-            "parameters": {
-                "max_new_tokens": max_tokens,
-                "temperature": temperature
-            }
-        }
-    )
-    
-    if response.status_code == 200:
-        return response.json()[0]["generated_text"][len(prompt):].strip()
-    else:
-        return f"Error: {response.status_code} - {response.text}"
-
-
-# ============================================
-# OPTION 3: Ollama (100% FREE, runs locally)
-# ============================================
-def ask_llm_ollama(prompt: str, max_tokens: int = 100, temperature: float = 0.2):
-    """Ollama - Completely free, runs on your machine"""
-    try:
-        response = requests.post(
-            "http://localhost:11434/api/generate",
-            json={
-                "model": "llama3.2",  # or "mistral", "phi3"
-                "prompt": prompt,
-                "stream": False,
-                "options": {
-                    "num_predict": max_tokens,
-                    "temperature": temperature
-                }
-            }
-        )
-        return response.json()["response"]
-    except Exception as e:
-        return f"Error: Install Ollama from https://ollama.com\nThen run: ollama pull llama3.2"
-
-
-# ============================================
-# Easy wrapper function
-# ============================================
-def ask_llm(prompt: str, max_tokens: int = 100, temperature: float = 0.2, provider: str = "groq"):
-    """
-    Universal LLM function
-    """
-    if provider == "groq":
-        return ask_llm_groq(prompt, max_tokens, temperature)
-    elif provider == "huggingface":
-        return ask_llm_huggingface(prompt, max_tokens, temperature)
-    elif provider == "ollama":
-        return ask_llm_ollama(prompt, max_tokens, temperature)
-    else:
-        raise ValueError(f"Unknown provider: {provider}")
 
 # ============================================
 # Creates json every n seconds
@@ -155,7 +83,7 @@ def create_json_memory(current_log, previous_context, user_goal):
     print(f"[DEBUG LLM] DISTRAZIONE CALCOLATA: {global_distraction}%", file=sys.stderr)
     print("="*50 + "\n", file=sys.stderr)
 
-    response = ask_llm(prompt, max_tokens=350, provider="groq") 
+    response = ask_llm(prompt, max_tokens=350)
     
     try:
         start = response.find('{')
@@ -171,9 +99,6 @@ def create_json_memory(current_log, previous_context, user_goal):
 # ============================================
 # Generating the final report using json memory
 # ============================================
-
-import json
-from llm_client_2 import ask_llm
 
 def generate_final_report_from_memory(final_context, user_context="General Creator", stats_package=None):
     """
@@ -449,7 +374,7 @@ Current score: {final_focus_score}/100, Distractions: {distractions_count}
     
     # 6. CALL TO LLM
     try:
-        report = ask_llm(prompt, max_tokens=900, temperature=0.3, provider="groq")
+        report = ask_llm(prompt, max_tokens=900, temperature=0.3)
         print("Report generato con successo")
         return report
     except Exception as e:

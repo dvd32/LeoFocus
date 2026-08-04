@@ -31,8 +31,8 @@ Unlike simple app blockers, **LeoFocus observes how you actually work**.
 
 * Live focus score
 * Active application tracking
-* Productivity status (good / warning / bad)
-* Immediate alerts for heavy distraction
+* Time spent per application, updated every second
+* A Leonardo popup that scolds you when distraction stays above 50%
 
 ### 📜 Final “Session Codex” Report
 
@@ -60,8 +60,7 @@ Python Backend (trackers.py)
    ├── Activity Tracking (pynput, pygetwindow)
    ├── Focus & Distraction Logic
    ├── Session Memory (JSON)
-   └── LLM Reasoning Engine
-           ├── Groq (default)
+   └── LLM Reasoning Engine (Groq)
 ```
 
 ### Why this architecture?
@@ -100,12 +99,12 @@ Python Backend (trackers.py)
 
 ## 🖥️ Supported Platforms
 
-| Platform    | Status                                  |
-| ----------- | --------------------------------------- |
-| Windows     | ✅ Fully supported                       |
-| macOS       | ✅ Fully supported                       |
-| Linux       | ✅ Fully supported                       |
-| Flutter Web | ⚠️ UI works, backend still runs locally |
+| Platform    | Status                                                    |
+| ----------- | --------------------------------------------------------- |
+| Windows     | ✅ Fully supported                                         |
+| macOS       | ✅ Fully supported                                         |
+| Linux       | ✅ Fully supported                                         |
+| Flutter Web | ❌ Not supported — the app spawns a local Python process   |
 
 ---
 
@@ -116,20 +115,8 @@ Python Backend (trackers.py)
 #### System
 
 * Python **3.9+**
-* Flutter **3.19+**
+* Flutter with **Dart SDK 3.10+** (see `frontend/pubspec.yaml`)
 * Git
-
-#### Python packages
-
-```bash
-pip install pynput pygetwindow groq requests
-```
-
-> On Windows, you may also need:
-
-```bash
-pip install pywin32
-```
 
 ---
 
@@ -137,7 +124,6 @@ pip install pywin32
 
 ```bash
 git clone https://github.com/your-username/leofocus.git
-cd leofocus
 ```
 
 ---
@@ -145,20 +131,18 @@ cd leofocus
 ### 3️⃣ Backend setup
 
 ```bash
-cd leonardo_backend/trackers
-python --version
+pip install -r requirements.txt
 ```
+
+The Windows-only packages in that file install themselves only on Windows.
 
 ---
 
-### 4️⃣ LLM Configuration
+### 4️⃣ LLM configuration
 
-LeoFocus supports different **LLM providers** but right now is using Groq:
-
-#### 🟢 Groq
-
-* Free
-* Extremely fast
+The reasoning engine runs on **Groq** — free, and fast enough to keep the
+30-second feedback loop responsive. Get a key at
+[console.groq.com/keys](https://console.groq.com/keys), then:
 
 ```bash
 export GROQ_API_KEY="your_key_here"
@@ -170,13 +154,19 @@ Windows:
 setx GROQ_API_KEY "your_key_here"
 ```
 
+Without the key the app still starts and tracks activity — Leonardo just
+reports that he is "currently meditating" instead of commenting.
+
+---
+
 ### 5️⃣ Run the Flutter app
 
 ```bash
-cd frontend
-flutter pub get
-flutter run
+cd frontend && flutter run
 ```
+
+The app resolves the backend relative to its own working directory, so keep
+the `frontend/` and `leonardo_backend/` folders side by side.
 
 ---
 
@@ -197,12 +187,20 @@ flutter run
 
 ```
 leofocus/
-├── frontend/
+├── frontend/               # Flutter desktop app
+│   └── lib/
+│       ├── main.dart
+│       ├── process_service.dart   # spawns and talks to the Python backend
+│       ├── home_page_view.dart    # setup / advice / state routing
+│       ├── running_view.dart      # live session
+│       ├── report_view.dart       # final Session Codex
+│       └── theme.dart
 ├── leonardo_backend/
 │   └── trackers/
-│       ├── trackers.py
-│       ├── llm_client_2.py
-│       └── local_summarizer.py
+│       ├── trackers.py            # activity tracking + session loop
+│       ├── llm_client.py          # Groq client, memory and final report
+│       └── local_summarizer.py    # pre-session advice
+├── requirements.txt
 └── README.md
 ```
 

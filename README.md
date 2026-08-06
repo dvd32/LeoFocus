@@ -1,267 +1,91 @@
-# 🎨 LeoFocus
+# LeoFocus: Context-Aware Focus Tracking System
 
-### *Observing your craft with keen eyes*
+[![Flutter](https://img.shields.io/badge/Flutter-3.10%2B-02569B?style=for-the-badge&logo=flutter&logoColor=white)](https://flutter.dev)
+[![Python](https://img.shields.io/badge/Python-3.9%2B-3776AB?style=for-the-badge&logo=python&logoColor=white)](https://www.python.org/)
+[![Groq](https://img.shields.io/badge/LLM_Engine-Groq_Llama--3.1--8B-f05138?style=for-the-badge)](https://groq.com/)
 
-LeoFocus is an intelligent **focus-tracking and study-session analysis system** inspired by *Leonardo da Vinci*.
-It monitors your real activity (apps, window switches, keystrokes, idle time) and uses an **LLM-powered reasoning engine** to provide **real-time feedback**, emotional reactions, and a **final performance report** at the end of each session.
+This repository contains the core system and methodology for **LeoFocus**, an intelligent, real-time focus-tracking application developed as a research initiative exploring Human-Computer Interaction (HCI), Real-Time OS Telemetry, and Generative AI Coaching.
 
-Unlike simple app blockers, **LeoFocus observes how you actually work**.
+**Academic Context**: Developed within Creativity, Science and Innovation 2025/26 coursework at **Politecnico di Milano**.
 
----
+## Project Achievements & Validation
 
-## ✨ Features
+LeoFocus has been validated not just as an academic project, but as a viable product concept:
+* **Pitch & Corporate Review**: Presented to **Amazon Italy**.
+* **Academic Showcase**: Exhibited at the **LIRE Research Event** (Politecnico di Milano).
+* **Incubation & Funding**: Selected for the **TEF Ignition Program** (joint program by Bocconi University & Politecnico di Milano), securing **€2,000** in seed funding.
 
-### 🧠 Intelligent Focus Analysis
+> **Note on Codebase (MVP)**: This repository contains the Minimum Viable Product (MVP) developed during the research and validation phase. The architecture and code reflect a proof-of-concept aimed at rapid prototyping, telemetry validation, and immediate user testing.
 
-* Tracks **active windows**, **time spent per app**, and **window switching**
-* Measures **keystrokes**, **mouse activity**, and **idle periods**
-* Detects **distractions** context-aware (e.g. browser tabs, social media)
+## User Research & Interface Design
 
-### 🎭 Leonardo Avatar (LLM-Driven)
+The application's interface and overall User Experience were iteratively designed and refined following extensive usability testing and qualitative evaluations conducted with students from both **Politecnico di Milano** and **Bocconi University**.
 
-* Acts as a **virtual mentor**
-* Emotion changes dynamically:
+<div align="center">
+  <!-- Sostituisci i percorsi src con quelli effettivi dei tuoi screenshot -->
+  <img src="docs/assets/main_leo.png" width="45%" alt="Main View">
+  <img src="docs/assets/session_leo.png" width="45%" alt="Session View">
+  <br>
+  <em>Figure 1: Main View and Session View interfaces.</em>
+</div>
 
-  * 😊 *Happy* → high focus
-  * 😐 *Observing* → moderate focus
-  * 😠 *Angry* → high distraction
-* Short, punchy feedback every 30 seconds
+## System Architecture
 
-### 📊 Real-Time Session Metrics
+LeoFocus operates on a decoupled **Desktop Client–Background Daemon** architecture to ensure low-level system monitoring without blocking the UI thread.
 
-* Live focus score
-* Active application tracking
-* Time spent per application, updated every second
-* A Leonardo popup that scolds you when distraction stays above 50%
+**Frontend (Flutter Desktop)**
+Handles the UI state, user goal initialization, and renders real-time telemetry. It acts as the process manager, spawning and communicating with the backend.
 
-### 📜 Final “Session Codex” Report
+**Backend (Python 3 Daemon)**
+Executes low-level event collection, distraction classification, and LLM orchestration. 
+* **OS Telemetry**: Utilizes native OS queries (`osascript` on macOS, `win32com` on Windows) to extract active window titles, document names, and physical input cadence via `pynput`.
+* **LLM Engine**: Integrates a Groq-powered API (`Llama-3.1-8B`) for ultra-low latency, real-time session evaluation.
+* **IPC Protocol**: Communication between Flutter and Python is fully asynchronous, utilizing structured JSON lines over `stdout` / `stdin` Streams.
 
-At the end of a session, LeoFocus generates a **Markdown report** including:
+```mermaid
+flowchart TD
+    subgraph Frontend["Flutter Desktop App"]
+        UI["UI State & Router"]
+        PS["Process Manager & Stream Parser"]
+        UI <--> PS
+    end
 
-* Final focus score and grade
-* Deep work time
-* Distraction analysis
-* Trend detection (improving / stable / declining)
-* Top applications used
-* Actionable “Virtù Principles”
-* A concrete target for the next session
+    subgraph Backend["Python 3 Daemon"]
+        TR["Event Loop & State Machine"]
+        Telemetry["OS Telemetry & Hooks (pynput, osascript)"]
+        Logic["Distraction Classifier"]
+        AI["AI Reasoning Engine (Groq LLM)"]
+    end
 
----
-
-## 🏗️ Architecture Overview
-
-```
-Flutter (UI)
-   │
-   │  JSON over stdout / stdin
-   ▼
-Python Backend (trackers.py)
-   │
-   ├── Activity Tracking (pynput, pygetwindow)
-   ├── Focus & Distraction Logic
-   ├── Session Memory (JSON)
-   └── LLM Reasoning Engine (Groq)
-```
-
-### Why this architecture?
-
-* ✅ Cross-platform (Windows, macOS, Linux)
-* ✅ Real OS-level activity (not browser-only)
-* ✅ LLM-powered reasoning without blocking the UI
-* ✅ Clean IPC via JSON streams
-
----
-
-## 🧪 How LeoFocus Works
-
-1. **Start a session**
-
-   * User provides a goal (e.g. *“studying maths”*)
-   * Leonardo gives initial advice
-
-2. **Live tracking**
-
-   * Every second: activity metrics sent to Flutter
-   * Every 30 seconds: LLM evaluates behavior and updates emotion + focus score
-
-3. **Distraction detection**
-
-   * App-based (e.g. WhatsApp, YouTube)
-   * Browser-tab-based (e.g. Reddit, Netflix)
-   * Context-aware overrides (allowed apps if mentioned in goal)
-
-4. **End session**
-
-   * Clean shutdown via stdin (cross-platform safe)
-   * Final report generated using **real session data**
-
----
-
-## 🖥️ Supported Platforms
-
-| Platform    | Status                                                    |
-| ----------- | --------------------------------------------------------- |
-| Windows     | ✅ Fully supported                                         |
-| macOS       | ✅ Fully supported                                         |
-| Linux       | ✅ Fully supported                                         |
-| Flutter Web | ❌ Not supported — the app spawns a local Python process   |
-
----
-
-## 🔧 Installation & Setup
-
-### 1️⃣ Prerequisites
-
-#### System
-
-* Python **3.9+**
-* Flutter with **Dart SDK 3.10+** (see `frontend/pubspec.yaml`)
-* Git
-
----
-
-### 2️⃣ Clone the repository
-
-```bash
-git clone https://github.com/your-username/leofocus.git
-```
-
----
-
-### 3️⃣ Backend setup
-
-```bash
-pip install -r requirements.txt
-```
-
-The Windows-only packages in that file install themselves only on Windows.
-
----
-
-### 4️⃣ LLM configuration
-
-The reasoning engine runs on **Groq** — free, and fast enough to keep the
-30-second feedback loop responsive. Get a key at
-[console.groq.com/keys](https://console.groq.com/keys), then copy the example
-env file and paste it in:
-
-```bash
-cp .env.example .env
-```
-
-`.env` is gitignored, so your key never leaves your machine. If you prefer,
-export `LLM_API_KEY` in your shell instead — the environment wins over the
-file.
-
-Without a key the app still starts and tracks activity; Leonardo simply
-reports that he is "currently meditating" instead of commenting.
-
----
-
-### 5️⃣ Run the Flutter app
-
-```bash
-cd frontend && flutter run
-```
-
-The app resolves the backend relative to its own working directory, so keep
-the `frontend/` and `leonardo_backend/` folders side by side.
-
----
-
-## 🧑‍🎓 Usage Guide
-
-1. Launch LeoFocus
-2. Enter your session goal
-3. Read Leonardo’s advice
-4. Click **Start Session**
-5. Work normally
-6. Observe real-time feedback
-7. Click **End Session**
-8. Review your **Session Codex**
-
----
-
-## 📂 Project Structure
+    PS -- "Spawns & Reads JSON" --> TR
+    TR <--> Telemetry
+    TR <--> Logic
+    TR <--> AI
 
 ```
-leofocus/
-├── frontend/               # Flutter desktop app
-│   └── lib/
-│       ├── main.dart
-│       ├── process_service.dart   # spawns and talks to the Python backend
-│       ├── home_page_view.dart    # setup / advice / state routing
-│       ├── running_view.dart      # live session
-│       ├── report_view.dart       # final Session Codex
-│       └── theme.dart
-├── leonardo_backend/
-│   └── trackers/
-│       ├── trackers.py            # activity tracking + session loop
-│       ├── llm_client.py          # Groq client, memory and final report
-│       ├── local_summarizer.py    # pre-session advice
-│       └── test_*.py              # offline self-checks, no key needed
-├── .env.example
-├── requirements.txt
-└── README.md
-```
+## Methodology: The Deterministic Guardrail
 
-Run the checks with `flutter test` in `frontend/`, and
-`python3 test_trackers.py && python3 test_llm_client.py` in
-`leonardo_backend/trackers/`.
+To eliminate LLM hallucinations and prevent overly lenient focus evaluations, the backend enforces a deterministic mathematical guardrail. If the LLM assigns a focus score higher than what is realistically possible given the user's actual distraction metrics, the system automatically caps the score:
+
+$$
+\text{Max Allowed Score}=\min\Big(100\,(100-\text{Recent Distraction Percentage})+10\Big)
+$$
+
+This ensures that the coaching feedback remains strictly accountable to the raw OS telemetry data.
 
 ---
 
-## ⚠️ Notes & Limitations
+## Tech Stack
 
-* Requires OS-level permissions for activity tracking
-* Antivirus software may flag monitoring behavior (false positives)
-* Browser detection relies on window titles
-* Designed for **self-improvement**, not surveillance
-
----
-
-## 🚀 Future Improvements
-
-* Session history dashboard
-* Charts & analytics
-* Cloud sync
-* Mobile companion app
+- **Frontend:** Flutter (Dart ^3.10.0), Provider, Google Fonts
+- **Backend:** Python 3.9+
+- **Telemetry:** `pynput`, `pygetwindow`, `pywin32`
+- **AI Integration:** Groq SDK (`llama-3.1-8b-instant`)
 
 ---
 
-## 🎓 Academic Context
+## Authors
 
-Developed as part of coursework at **Politecnico di Milano** for the CSI course, combining:
-
-* Human-Computer Interaction
-* LLM reasoning
-* Cross-platform systems
-* Real-time data processing
-
----
-
-## 👤 Authors
-
-**Pau Fernández**  
-MSc Student @ Politecnico di Milano  
-Artificial Intelligence · Human–Computer Interaction · Systems
-
-- 💼 LinkedIn: https://www.linkedin.com/in/pau-fern%C3%A1ndez-cester-9b7053252/  
-- 🧑‍💻 GitHub: https://github.com/PauFdz
-
-**Filippo Galletta**  
-MSc Student @ EIT Digital Master School (POLIMI, KTH) 
-
-- 💼 LinkedIn: [linkedin.com/in/filippo-galletta/](https://www.linkedin.com/in/filippo-galletta/)
-- 🧑‍💻 GitHub: [github.com/filippogalletta](https://github.com/filippogalletta)
-
-**David Ravelli**  
-Data Science @ EIT Digital Master School (POLIMI, AALTO) 
-
-- 💼 LinkedIn: https://www.linkedin.com/in/david-ravelli-2900a6252/ 
-- 🧑‍💻 GitHub: https://github.com/dvd32
-
----
-
-> *“Details make perfection, and perfection is not a detail.”*
-> — Leonardo da Vinci
+- **Pau Fernández Cester** — MSc AI @ PoliMi — [LinkedIn](https://www.linkedin.com/in/pau-fern%C3%A1ndez-cester-9b7053252/) | [GitHub](https://github.com/PauFdz)
+- **Filippo Galletta** — MSc Computer Science @ EIT Digital (PoliMi, KTH) — [LinkedIn](https://www.linkedin.com/in/filippo-galletta/) | [GitHub](https://github.com/filippogalletta)
+- **David Ravelli** — MSc Data Science @ EIT Digital (PoliMi, Aalto) — [LinkedIn](https://www.linkedin.com/in/david-ravelli-2900a6252/) | [GitHub](https://github.com/dvd32)

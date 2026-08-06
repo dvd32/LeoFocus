@@ -19,7 +19,9 @@ LeoFocus has been validated not just as an academic project, but as a viable pro
 
 ## User Research & Interface Design
 
-The application's interface and overall User Experience were iteratively designed and refined following extensive usability testing and qualitative evaluations conducted with students from both **Politecnico di Milano** and **Bocconi University**.
+The application's interface and overall User Experience were iteratively designed following qualitative evaluations and user testing conducted with students from both **Politecnico di Milano** and **Bocconi University**. 
+
+Based on user feedback, the UI was engineered with a **minimalist, semi-transparent overlay aesthetic** specifically crafted to stay accessible on-screen during deep work without creating visual friction or cognitive overload.
 
 <div align="center">
   <!-- Sostituisci i percorsi src con quelli effettivi dei tuoi screenshot -->
@@ -28,6 +30,8 @@ The application's interface and overall User Experience were iteratively designe
   <br>
   <em>Figure 1: Main View and Session View interfaces.</em>
 </div>
+
+> **Design credit:** UI/UX and visual assets by **Michele Castelletti** ([LinkedIn](https://www.linkedin.com/in/michele-castelletti-management-engineering-and-system-design/)).
 
 ## System Architecture
 

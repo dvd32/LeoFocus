@@ -8,6 +8,10 @@ This repository contains the core system and methodology for **LeoFocus**, an in
 
 **Academic Context**: Developed within Creativity, Science and Innovation 2025/26 coursework at **Politecnico di Milano**.
 
+## Product Overview
+
+Unlike traditional focus apps that suffer from **context blindness** (e.g., blocking YouTube entirely regardless of whether it is used for entertainment or educational tutorials), LeoFocus uses real-time OS telemetry and an LLM reasoning engine to dynamically evaluate user intent. By analyzing active window titles, document metadata, and physical input cadence, the application acts as an active, context-aware mentor that delivers instant 30-second feedback and intervenes only when true off-task behavior occurs.
+
 ## Project Achievements & Validation
 
 LeoFocus has been validated not just as an academic project, but as a viable product concept:

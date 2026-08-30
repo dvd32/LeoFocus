@@ -1,11 +1,20 @@
 import os
-import requests
 import json
 import sys
+from pathlib import Path
+
+from dotenv import load_dotenv
+
+# Flutter avvia il backend con cwd=leonardo_backend/trackers, quindi il .env
+# alla radice del repo va indicato esplicitamente. Le variabili già presenti
+# nell'ambiente vincono su quelle del file.
+load_dotenv(Path(__file__).resolve().parents[2] / ".env")
 
 _client = None
+
+
 # ============================================
-# OPTION 1: Groq (FREE, very fast!)
+# Groq client (FREE, very fast!)
 # ============================================
 def get_groq_llm():
     """Initialize Groq client (FREE API, very fast)"""
@@ -13,102 +22,55 @@ def get_groq_llm():
         from groq import Groq
     except ImportError:
         raise ImportError("Install: pip install groq")
-    
+
     global _client
-    _client = Groq(api_key="") # use your desired API key here
     if _client is None:
-        api_key = os.getenv("GROQ_API_KEY")
+        api_key = os.getenv("LLM_API_KEY")
         if not api_key:
             raise ValueError(
-                "Get free API key from https://console.groq.com/keys\n"
-                "Then: export GROQ_API_KEY='your-key'"
+                "Set LLM_API_KEY, either in the .env at the repo root or in "
+                "the environment.\n"
+                "Free Groq key: https://console.groq.com/keys"
             )
         _client = Groq(api_key=api_key)
     return _client
 
-def ask_llm_groq(prompt: str, max_tokens: int = 100, temperature: float = 0.2):
+
+def extract_json_object(response: str):
+    """Pull the JSON object out of an LLM reply, or None if there isn't one.
+
+    Non è codice difensivo: llama-3.1-8b-instant ignora sistematicamente
+    l'istruzione "JSON ONLY" e antepone una frase in prosa ("Mio caro
+    studente, ..."), quindi questa estrazione è sul percorso normale, non su
+    quello d'errore. Coperta da test_llm_client.py.
+    """
+    if not response:
+        return None
+    start = response.find('{')
+    end = response.rfind('}') + 1
+    if start == -1 or end <= start:
+        return None
+    try:
+        parsed = json.loads(response[start:end])
+    except ValueError:
+        return None
+    return parsed if isinstance(parsed, dict) else None
+
+
+def ask_llm(prompt: str, max_tokens: int = 100, temperature: float = 0.2, json_mode: bool = False):
     """Groq - FREE and lightning fast!"""
     client = get_groq_llm()
-    response = client.chat.completions.create(
-        model="llama-3.1-8b-instant",  # or "mixtral-8x7b-32768"
-        messages=[{"role": "user", "content": prompt}],
-        max_tokens=max_tokens,
-        temperature=temperature
-    )
+    kwargs = {
+        "model": "qwen/qwen3.8-27b",
+        "messages": [{"role": "user", "content": prompt}],
+        "max_tokens": max_tokens,
+        "temperature": temperature
+    }
+    if json_mode:
+        kwargs["response_format"] = {"type": "json_object"}
+        
+    response = client.chat.completions.create(**kwargs)
     return response.choices[0].message.content.strip()
-
-
-# ============================================
-# OPTION 2: Hugging Face Inference API (FREE)
-# ============================================
-def ask_llm_huggingface(prompt: str, max_tokens: int = 100, temperature: float = 0.2):
-    """Hugging Face - FREE but slower"""
-    api_key = os.getenv("HF_API_KEY")
-    if not api_key:
-        raise ValueError(
-            "Get free API key from https://huggingface.co/settings/tokens\n"
-            "Then: export HF_API_KEY='your-key'"
-        )
-    
-    API_URL = "https://api-inference.huggingface.co/models/meta-llama/Llama-3.2-3B-Instruct"
-    headers = {"Authorization": f"Bearer {api_key}"}
-    
-    response = requests.post(
-        API_URL,
-        headers=headers,
-        json={
-            "inputs": prompt,
-            "parameters": {
-                "max_new_tokens": max_tokens,
-                "temperature": temperature
-            }
-        }
-    )
-    
-    if response.status_code == 200:
-        return response.json()[0]["generated_text"][len(prompt):].strip()
-    else:
-        return f"Error: {response.status_code} - {response.text}"
-
-
-# ============================================
-# OPTION 3: Ollama (100% FREE, runs locally)
-# ============================================
-def ask_llm_ollama(prompt: str, max_tokens: int = 100, temperature: float = 0.2):
-    """Ollama - Completely free, runs on your machine"""
-    try:
-        response = requests.post(
-            "http://localhost:11434/api/generate",
-            json={
-                "model": "llama3.2",  # or "mistral", "phi3"
-                "prompt": prompt,
-                "stream": False,
-                "options": {
-                    "num_predict": max_tokens,
-                    "temperature": temperature
-                }
-            }
-        )
-        return response.json()["response"]
-    except Exception as e:
-        return f"Error: Install Ollama from https://ollama.com\nThen run: ollama pull llama3.2"
-
-
-# ============================================
-# Easy wrapper function
-# ============================================
-def ask_llm(prompt: str, max_tokens: int = 100, temperature: float = 0.2, provider: str = "groq"):
-    """
-    Universal LLM function
-    """
-    if provider == "groq":
-        return ask_llm_groq(prompt, max_tokens, temperature)
-    elif provider == "huggingface":
-        return ask_llm_huggingface(prompt, max_tokens, temperature)
-    elif provider == "ollama":
-        return ask_llm_ollama(prompt, max_tokens, temperature)
-    else:
-        raise ValueError(f"Unknown provider: {provider}")
 
 # ============================================
 # Creates json every n seconds
@@ -126,25 +88,20 @@ def create_json_memory(current_log, previous_context, user_goal):
     You are Leonardo da Vinci. You will be guiding the user through their goal. User goal: "{user_goal}". Always use english when communicating, apart from very few italian words.
     
     CURRENT SITUATION (Last 30s):
-    - Recent Distraction: {recent_distraction}% (Use this for your Emotion)
+    - Recent Distraction: {recent_distraction}% (Use this to set the tone of your comment)
     - Session Global Distraction: {global_distraction}% (Use this for Focus Score)
     - Apps Used: {json.dumps(current_log.get('windows', []))}
-    
+
     PREVIOUS HISTORY SUMMARY:
     "{previous_context.get('summary_so_far', 'Session started.')}"
 
     TASK:
     1. REWRITE the 'summary_so_far' concisely (max 3 sentences). Merge old and new. The summary should include how the user has been behaving during the whole session.
-    2. Determine emotion based strictly on Distraction Level: 
-       - 0% to 30%: "happy" (Proud, praises the user's virtù).
-       - 31% to 70%: "normal" (Observing, calm).
-       - 71% to 100%: "angry" (Stern, scolding, disappointed by the waste of genius).
-    3. Generate a NEW very short comment. Comment should be a few words long, fully in english.
+    2. Generate a NEW very short comment. Comment should be a few words long, fully in english.
 
     OUTPUT FORMAT (JSON ONLY):
     {{
       "focus_score": {focus_score},
-      "leonardo_emotion": "happy" | "normal" | "angry",
       "summary_so_far": "<REWRITTEN SUMMARY>",
       "leonardo_comment": "<COMMENT>"
     }}
@@ -155,25 +112,17 @@ def create_json_memory(current_log, previous_context, user_goal):
     print(f"[DEBUG LLM] DISTRAZIONE CALCOLATA: {global_distraction}%", file=sys.stderr)
     print("="*50 + "\n", file=sys.stderr)
 
-    response = ask_llm(prompt, max_tokens=350, provider="groq") 
-    
-    try:
-        start = response.find('{')
-        end = response.rfind('}') + 1
-        if start != -1 and end != -1:
-            return json.loads(response[start:end])
-        else:
-            return json.loads(response)
-    except Exception as e:
-        print(f"JSON Parsing failed: {e}", file=sys.stderr)
+    response = ask_llm(prompt, max_tokens=350, json_mode=True)
+
+    parsed = extract_json_object(response)
+    if parsed is None:
+        print("JSON Parsing failed, keeping previous context", file=sys.stderr)
         return previous_context
+    return parsed
 
 # ============================================
 # Generating the final report using json memory
 # ============================================
-
-import json
-from llm_client_2 import ask_llm
 
 def generate_final_report_from_memory(final_context, user_context="General Creator", stats_package=None):
     """
@@ -254,13 +203,13 @@ def generate_final_report_from_memory(final_context, user_context="General Creat
             distractions_count = int(total_iterations * 0.1)
     
     # E) DEEP WORK TIME
-    # Periods with score >= 70 are deep work
+    # Periods with recent_distraction <= 30 are deep work
     deep_work_iterations = 0
     if history:
         for entry in history:
             if isinstance(entry, dict):
-                score = entry.get('score', 50)
-                if score >= 70:
+                recent_distraction = entry.get('recent_distraction', 50)
+                if recent_distraction <= 30:
                     deep_work_iterations += 1
     else:
         # Fallback
@@ -379,7 +328,7 @@ Generate a Markdown report with this EXACT structure:
 
 # 🎨 Session Codex: [Witty Title for {user_context}]
 
-> *"{sparkline} {trend.capitalize()} trajectory detected"*
+> *"[One-liner from Leonardo summarizing how he feels about the session overall]"*
 
 ---
 
@@ -425,13 +374,7 @@ Current score: {final_focus_score}/100, Distractions: {distractions_count}
 
 **Target:** [Your specific goal - be concrete with numbers]
 
----
 
-> *"Virtù is not perfection, ragazzo mio—it is persistent refinement. You scored {final_focus_score}/100 today. Tomorrow, aim for {min(100, final_focus_score + 10)}."*
-> 
-> — Leonardo
-
----
 
 **REMEMBER:**
 - Keep it VISUAL and SCANNABLE
@@ -449,7 +392,7 @@ Current score: {final_focus_score}/100, Distractions: {distractions_count}
     
     # 6. CALL TO LLM
     try:
-        report = ask_llm(prompt, max_tokens=900, temperature=0.3, provider="groq")
+        report = ask_llm(prompt, max_tokens=900, temperature=0.3)
         print("Report generato con successo")
         return report
     except Exception as e:
@@ -498,13 +441,7 @@ You maintained deep work for {deep_work_percentage}% of the session ({deep_work_
 
 **Target:** Achieve {min(100, final_focus_score + 15)}/100 focus score and reduce distractions to <{max(1, distractions_count - 2)} events.
 
----
 
-> *"The session is complete. Now rest, then return stronger. Your {final_focus_score}/100 shows promise."*
-> 
-> — Leonardo
-
----
 
 **Error Note:** Leonardo's analytical mind encountered an error. This is an automated summary with REAL data.
 Error: {str(e)}

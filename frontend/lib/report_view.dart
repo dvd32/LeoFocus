@@ -15,7 +15,8 @@ class ReportView extends StatefulWidget {
   State<ReportView> createState() => _ReportViewState();
 }
 
-class _ReportViewState extends State<ReportView> with SingleTickerProviderStateMixin {
+class _ReportViewState extends State<ReportView>
+    with SingleTickerProviderStateMixin {
   late AnimationController _shimmerController;
 
   @override
@@ -36,7 +37,8 @@ class _ReportViewState extends State<ReportView> with SingleTickerProviderStateM
   @override
   Widget build(BuildContext context) {
     final leonardo = Provider.of<LeonardoService>(context);
-    final hasReport = leonardo.finalReport != null && leonardo.finalReport!.isNotEmpty;
+    final hasReport =
+        leonardo.finalReport != null && leonardo.finalReport!.isNotEmpty;
 
     // Animazione di entrata con parallax
     return TweenAnimationBuilder<double>(
@@ -56,7 +58,7 @@ class _ReportViewState extends State<ReportView> with SingleTickerProviderStateM
         children: [
           // Header con statistiche rapide (se report disponibile)
           if (hasReport) _buildQuickStats(leonardo),
-          
+
           if (hasReport) const SizedBox(height: 16),
 
           // Report principale
@@ -78,9 +80,18 @@ class _ReportViewState extends State<ReportView> with SingleTickerProviderStateM
                                 begin: Alignment.topLeft,
                                 end: Alignment.bottomRight,
                                 colors: [
-                                  LeonardoTheme.surface.withOpacity(0.98),
-                                  LeonardoTheme.gold.withOpacity(0.03 + 0.02 * math.sin(_shimmerController.value * 2 * math.pi)),
-                                  LeonardoTheme.accent.withOpacity(0.02),
+                                  LeonardoTheme.surface.withValues(alpha: 0.98),
+                                  LeonardoTheme.gold.withValues(
+                                    alpha:
+                                        0.03 +
+                                        0.02 *
+                                            math.sin(
+                                              _shimmerController.value *
+                                                  2 *
+                                                  math.pi,
+                                            ),
+                                  ),
+                                  LeonardoTheme.accent.withValues(alpha: 0.02),
                                 ],
                               ),
                             ),
@@ -92,11 +103,11 @@ class _ReportViewState extends State<ReportView> with SingleTickerProviderStateM
                   // Contenuto del report
                   ClipRRect(
                     borderRadius: BorderRadius.circular(24),
-                    child: hasReport 
-                        ? _buildMarkdownContent(leonardo.finalReport!) 
+                    child: hasReport
+                        ? _buildMarkdownContent(leonardo.finalReport!)
                         : _buildEmptyState(),
                   ),
-                  
+
                   // Azioni floating
                   if (hasReport)
                     Positioned(
@@ -106,13 +117,15 @@ class _ReportViewState extends State<ReportView> with SingleTickerProviderStateM
                         children: [
                           _ActionButton(
                             icon: Icons.share_rounded,
-                            onTap: () => _shareReport(context, leonardo.finalReport!),
+                            onTap: () =>
+                                _shareReport(context, leonardo.finalReport!),
                             tooltip: 'Share',
                           ),
                           const SizedBox(width: 8),
                           _ActionButton(
                             icon: Icons.copy_rounded,
-                            onTap: () => _copyReport(context, leonardo.finalReport!),
+                            onTap: () =>
+                                _copyReport(context, leonardo.finalReport!),
                             tooltip: 'Copy',
                           ),
                         ],
@@ -135,13 +148,13 @@ class _ReportViewState extends State<ReportView> with SingleTickerProviderStateM
   Widget _buildQuickStats(LeonardoService leonardo) {
     // ⭐ ESTRAI METRICHE REALI DAL PACCHETTO STATS
     final stats = leonardo.finalStats ?? {};
-    
+
     // Valori reali dal Python (con type safety)
     final score = stats['final_score'] as int? ?? 0;
     final grade = stats['grade'] as String? ?? '?';
     final durationSeconds = stats['duration_seconds'] as int? ?? 0;
     final durationMinutes = (durationSeconds / 60).round();
-    
+
     return Row(
       children: [
         Expanded(
@@ -198,7 +211,7 @@ class _ReportViewState extends State<ReportView> with SingleTickerProviderStateM
       selectable: true,
       styleSheet: MarkdownStyleSheet(
         blockSpacing: 20,
-        
+
         // Headers con gerarchia visiva forte
         h1: GoogleFonts.cinzel(
           fontSize: 28,
@@ -208,7 +221,7 @@ class _ReportViewState extends State<ReportView> with SingleTickerProviderStateM
           letterSpacing: -0.5,
         ),
         h1Padding: const EdgeInsets.only(bottom: 8, top: 8),
-        
+
         h2: GoogleFonts.cinzel(
           fontSize: 20,
           fontWeight: FontWeight.w700,
@@ -217,26 +230,26 @@ class _ReportViewState extends State<ReportView> with SingleTickerProviderStateM
           letterSpacing: 0.5,
         ),
         h2Padding: const EdgeInsets.only(top: 24, bottom: 12),
-        
+
         h3: GoogleFonts.inter(
           fontSize: 16,
           fontWeight: FontWeight.bold,
-          color: LeonardoTheme.ink.withOpacity(0.9),
+          color: LeonardoTheme.ink.withValues(alpha: 0.9),
         ),
-        
+
         // Body text ottimizzato per leggibilità
         p: GoogleFonts.inter(
           fontSize: 15,
           height: 1.7,
-          color: LeonardoTheme.ink.withOpacity(0.85),
+          color: LeonardoTheme.ink.withValues(alpha: 0.85),
           letterSpacing: 0.2,
         ),
-        
+
         strong: GoogleFonts.inter(
           fontWeight: FontWeight.w700,
           color: LeonardoTheme.ink,
         ),
-        
+
         // Liste con migliore spacing
         listBullet: GoogleFonts.inter(
           color: LeonardoTheme.accent,
@@ -244,7 +257,7 @@ class _ReportViewState extends State<ReportView> with SingleTickerProviderStateM
           fontWeight: FontWeight.bold,
         ),
         listIndent: 24,
-        
+
         // Tabelle stilizzate
         tableHead: GoogleFonts.inter(
           fontWeight: FontWeight.bold,
@@ -254,32 +267,36 @@ class _ReportViewState extends State<ReportView> with SingleTickerProviderStateM
         ),
         tableBody: GoogleFonts.inter(
           fontSize: 15,
-          color: LeonardoTheme.ink.withOpacity(0.9),
+          color: LeonardoTheme.ink.withValues(alpha: 0.9),
           height: 1.6,
         ),
         tableBorder: TableBorder.all(
-          color: LeonardoTheme.ink.withOpacity(0.1),
+          color: LeonardoTheme.ink.withValues(alpha: 0.1),
           width: 1,
         ),
-        tableCellsPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-        
+        tableCellsPadding: const EdgeInsets.symmetric(
+          horizontal: 16,
+          vertical: 12,
+        ),
+
         // Quote Leonardo-style
         blockquote: GoogleFonts.crimsonText(
-          color: LeonardoTheme.ink.withOpacity(0.8),
+          color: LeonardoTheme.ink.withValues(alpha: 0.8),
           fontStyle: FontStyle.italic,
           fontSize: 16,
           height: 1.7,
           fontWeight: FontWeight.w500,
         ),
-        blockquotePadding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
+        blockquotePadding: const EdgeInsets.symmetric(
+          horizontal: 20,
+          vertical: 16,
+        ),
         blockquoteDecoration: BoxDecoration(
-          border: Border(
-            left: BorderSide(color: LeonardoTheme.gold, width: 4),
-          ),
+          border: Border(left: BorderSide(color: LeonardoTheme.gold, width: 4)),
           gradient: LinearGradient(
             colors: [
-              LeonardoTheme.gold.withOpacity(0.08),
-              LeonardoTheme.gold.withOpacity(0.02),
+              LeonardoTheme.gold.withValues(alpha: 0.08),
+              LeonardoTheme.gold.withValues(alpha: 0.02),
             ],
           ),
           borderRadius: const BorderRadius.only(
@@ -287,7 +304,7 @@ class _ReportViewState extends State<ReportView> with SingleTickerProviderStateM
             bottomRight: Radius.circular(12),
           ),
         ),
-        
+
         // Code blocks
         code: GoogleFonts.firaCode(
           backgroundColor: Colors.transparent,
@@ -295,17 +312,20 @@ class _ReportViewState extends State<ReportView> with SingleTickerProviderStateM
           color: LeonardoTheme.accent,
         ),
         codeblockDecoration: BoxDecoration(
-          color: LeonardoTheme.ink.withOpacity(0.04),
+          color: LeonardoTheme.ink.withValues(alpha: 0.04),
           borderRadius: BorderRadius.circular(12),
-          border: Border.all(color: LeonardoTheme.ink.withOpacity(0.08), width: 1),
+          border: Border.all(
+            color: LeonardoTheme.ink.withValues(alpha: 0.08),
+            width: 1,
+          ),
         ),
         codeblockPadding: const EdgeInsets.all(16),
-        
+
         // Horizontal rule
         horizontalRuleDecoration: BoxDecoration(
           border: Border(
             top: BorderSide(
-              color: LeonardoTheme.gold.withOpacity(0.3),
+              color: LeonardoTheme.gold.withValues(alpha: 0.3),
               width: 2,
             ),
           ),
@@ -325,21 +345,18 @@ class _ReportViewState extends State<ReportView> with SingleTickerProviderStateM
             duration: const Duration(milliseconds: 1200),
             curve: Curves.elasticOut,
             builder: (context, value, child) {
-              return Transform.scale(
-                scale: value,
-                child: child,
-              );
+              return Transform.scale(scale: value, child: child);
             },
             child: Container(
               padding: const EdgeInsets.all(24),
               decoration: BoxDecoration(
-                color: LeonardoTheme.gold.withOpacity(0.1),
+                color: LeonardoTheme.gold.withValues(alpha: 0.1),
                 shape: BoxShape.circle,
               ),
               child: Icon(
                 Icons.description_outlined,
                 size: 56,
-                color: LeonardoTheme.gold.withOpacity(0.6),
+                color: LeonardoTheme.gold.withValues(alpha: 0.6),
               ),
             ),
           ),
@@ -349,7 +366,7 @@ class _ReportViewState extends State<ReportView> with SingleTickerProviderStateM
             style: GoogleFonts.cinzel(
               fontSize: 20,
               fontWeight: FontWeight.w600,
-              color: LeonardoTheme.ink.withOpacity(0.5),
+              color: LeonardoTheme.ink.withValues(alpha: 0.5),
             ),
           ),
           const SizedBox(height: 8),
@@ -357,7 +374,7 @@ class _ReportViewState extends State<ReportView> with SingleTickerProviderStateM
             "Completa una sessione per generare il report",
             style: GoogleFonts.inter(
               fontSize: 14,
-              color: LeonardoTheme.ink.withOpacity(0.4),
+              color: LeonardoTheme.ink.withValues(alpha: 0.4),
             ),
           ),
         ],
@@ -371,26 +388,26 @@ class _ReportViewState extends State<ReportView> with SingleTickerProviderStateM
       duration: const Duration(milliseconds: 600),
       curve: Curves.easeOutBack,
       builder: (context, value, child) {
-        return Transform.scale(
-          scale: value,
-          child: child,
-        );
+        return Transform.scale(scale: value, child: child);
       },
       child: SizedBox(
         width: double.infinity,
         height: 64,
         child: ElevatedButton(
-          style: ElevatedButton.styleFrom(
-            backgroundColor: LeonardoTheme.accent,
-            foregroundColor: Colors.white,
-            elevation: 12,
-            shadowColor: LeonardoTheme.accent.withOpacity(0.5),
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(20),
-            ),
-          ).copyWith(
-            overlayColor: WidgetStateProperty.all(Colors.white.withOpacity(0.2)),
-          ),
+          style:
+              ElevatedButton.styleFrom(
+                backgroundColor: LeonardoTheme.accent,
+                foregroundColor: Colors.white,
+                elevation: 12,
+                shadowColor: LeonardoTheme.accent.withValues(alpha: 0.5),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(20),
+                ),
+              ).copyWith(
+                overlayColor: WidgetStateProperty.all(
+                  Colors.white.withValues(alpha: 0.2),
+                ),
+              ),
           onPressed: () {
             HapticFeedback.mediumImpact();
             leonardo.reset();
@@ -418,7 +435,7 @@ class _ReportViewState extends State<ReportView> with SingleTickerProviderStateM
   void _copyReport(BuildContext context, String text) async {
     await Clipboard.setData(ClipboardData(text: text));
     HapticFeedback.lightImpact();
-    
+
     if (context.mounted) {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
@@ -428,13 +445,18 @@ class _ReportViewState extends State<ReportView> with SingleTickerProviderStateM
               const SizedBox(width: 12),
               Text(
                 "Report copied to clipboard",
-                style: GoogleFonts.inter(color: Colors.white, fontWeight: FontWeight.w500),
+                style: GoogleFonts.inter(
+                  color: Colors.white,
+                  fontWeight: FontWeight.w500,
+                ),
               ),
             ],
           ),
           backgroundColor: LeonardoTheme.accent,
           behavior: SnackBarBehavior.floating,
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(12),
+          ),
           duration: const Duration(seconds: 2),
           margin: const EdgeInsets.all(16),
         ),
@@ -480,10 +502,10 @@ class _QuickStatCard extends StatelessWidget {
       decoration: BoxDecoration(
         color: LeonardoTheme.surface,
         borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: color.withOpacity(0.3), width: 2),
+        border: Border.all(color: color.withValues(alpha: 0.3), width: 2),
         boxShadow: [
           BoxShadow(
-            color: color.withOpacity(0.1),
+            color: color.withValues(alpha: 0.1),
             blurRadius: 12,
             offset: const Offset(0, 4),
           ),
@@ -512,7 +534,7 @@ class _QuickStatCard extends StatelessWidget {
                   suffix,
                   style: GoogleFonts.inter(
                     fontSize: 12,
-                    color: LeonardoTheme.ink.withOpacity(0.5),
+                    color: LeonardoTheme.ink.withValues(alpha: 0.5),
                   ),
                 ),
             ],
@@ -522,7 +544,7 @@ class _QuickStatCard extends StatelessWidget {
             label,
             style: GoogleFonts.inter(
               fontSize: 11,
-              color: LeonardoTheme.ink.withOpacity(0.6),
+              color: LeonardoTheme.ink.withValues(alpha: 0.6),
               fontWeight: FontWeight.w500,
               letterSpacing: 0.5,
             ),
@@ -557,14 +579,14 @@ class _ActionButton extends StatelessWidget {
           child: Container(
             padding: const EdgeInsets.all(12),
             decoration: BoxDecoration(
-              color: LeonardoTheme.surface.withOpacity(0.9),
+              color: LeonardoTheme.surface.withValues(alpha: 0.9),
               borderRadius: BorderRadius.circular(12),
               border: Border.all(
-                color: LeonardoTheme.ink.withOpacity(0.1),
+                color: LeonardoTheme.ink.withValues(alpha: 0.1),
               ),
               boxShadow: [
                 BoxShadow(
-                  color: Colors.black.withOpacity(0.08),
+                  color: Colors.black.withValues(alpha: 0.08),
                   blurRadius: 12,
                   offset: const Offset(0, 4),
                 ),
@@ -573,7 +595,7 @@ class _ActionButton extends StatelessWidget {
             child: Icon(
               icon,
               size: 20,
-              color: LeonardoTheme.ink.withOpacity(0.7),
+              color: LeonardoTheme.ink.withValues(alpha: 0.7),
             ),
           ),
         ),

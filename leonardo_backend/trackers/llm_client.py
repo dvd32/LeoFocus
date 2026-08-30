@@ -203,13 +203,13 @@ def generate_final_report_from_memory(final_context, user_context="General Creat
             distractions_count = int(total_iterations * 0.1)
     
     # E) DEEP WORK TIME
-    # Periods with score >= 70 are deep work
+    # Periods with recent_distraction <= 30 are deep work
     deep_work_iterations = 0
     if history:
         for entry in history:
             if isinstance(entry, dict):
-                score = entry.get('score', 50)
-                if score >= 70:
+                recent_distraction = entry.get('recent_distraction', 50)
+                if recent_distraction <= 30:
                     deep_work_iterations += 1
     else:
         # Fallback
@@ -328,7 +328,7 @@ Generate a Markdown report with this EXACT structure:
 
 # 🎨 Session Codex: [Witty Title for {user_context}]
 
-> *"{sparkline} {trend.capitalize()} trajectory detected"*
+> *"[One-liner from Leonardo summarizing how he feels about the session overall]"*
 
 ---
 
@@ -374,13 +374,7 @@ Current score: {final_focus_score}/100, Distractions: {distractions_count}
 
 **Target:** [Your specific goal - be concrete with numbers]
 
----
 
-> *"Virtù is not perfection, ragazzo mio—it is persistent refinement. You scored {final_focus_score}/100 today. Tomorrow, aim for {min(100, final_focus_score + 10)}."*
-> 
-> — Leonardo
-
----
 
 **REMEMBER:**
 - Keep it VISUAL and SCANNABLE
@@ -447,13 +441,7 @@ You maintained deep work for {deep_work_percentage}% of the session ({deep_work_
 
 **Target:** Achieve {min(100, final_focus_score + 15)}/100 focus score and reduce distractions to <{max(1, distractions_count - 2)} events.
 
----
 
-> *"The session is complete. Now rest, then return stronger. Your {final_focus_score}/100 shows promise."*
-> 
-> — Leonardo
-
----
 
 **Error Note:** Leonardo's analytical mind encountered an error. This is an automated summary with REAL data.
 Error: {str(e)}

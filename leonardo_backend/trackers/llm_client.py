@@ -57,15 +57,19 @@ def extract_json_object(response: str):
     return parsed if isinstance(parsed, dict) else None
 
 
-def ask_llm(prompt: str, max_tokens: int = 100, temperature: float = 0.2):
+def ask_llm(prompt: str, max_tokens: int = 100, temperature: float = 0.2, json_mode: bool = False):
     """Groq - FREE and lightning fast!"""
     client = get_groq_llm()
-    response = client.chat.completions.create(
-        model="llama-3.1-8b-instant",  # or "mixtral-8x7b-32768"
-        messages=[{"role": "user", "content": prompt}],
-        max_tokens=max_tokens,
-        temperature=temperature
-    )
+    kwargs = {
+        "model": "qwen/qwen3.8-27b",
+        "messages": [{"role": "user", "content": prompt}],
+        "max_tokens": max_tokens,
+        "temperature": temperature
+    }
+    if json_mode:
+        kwargs["response_format"] = {"type": "json_object"}
+        
+    response = client.chat.completions.create(**kwargs)
     return response.choices[0].message.content.strip()
 
 # ============================================
@@ -108,7 +112,7 @@ def create_json_memory(current_log, previous_context, user_goal):
     print(f"[DEBUG LLM] DISTRAZIONE CALCOLATA: {global_distraction}%", file=sys.stderr)
     print("="*50 + "\n", file=sys.stderr)
 
-    response = ask_llm(prompt, max_tokens=350)
+    response = ask_llm(prompt, max_tokens=350, json_mode=True)
 
     parsed = extract_json_object(response)
     if parsed is None:

@@ -83,6 +83,23 @@ This ensures that the coaching feedback remains strictly accountable to the raw 
 
 ---
 
+## 🚀 How to run the app
+
+We provided automated launcher scripts that handle all the tedious setup (Python, dependencies, Virtual Environments, and API keys) for you.
+
+**On macOS:**
+Double-click `start_mac.command` in the root folder, or run it via terminal:
+```bash
+./start_mac.command
+```
+
+**On Windows:**
+Double-click `start_windows.bat` in the root folder.
+
+*Note: The script will automatically ask for your free [Groq API Key](https://console.groq.com/keys) on first launch if it's not already configured.*
+
+---
+
 ## Tech Stack
 
 - **Frontend:** Flutter (Dart ^3.10.0), Provider, Google Fonts

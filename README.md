@@ -2,7 +2,7 @@
 
 [![Flutter](https://img.shields.io/badge/Flutter-3.10%2B-02569B?style=for-the-badge&logo=flutter&logoColor=white)](https://flutter.dev)
 [![Python](https://img.shields.io/badge/Python-3.9%2B-3776AB?style=for-the-badge&logo=python&logoColor=white)](https://www.python.org/)
-[![Groq](https://img.shields.io/badge/LLM_Engine-Groq_Llama--3.1--8B-f05138?style=for-the-badge)](https://groq.com/)
+[![Groq](https://img.shields.io/badge/LLM_Engine-Groq_Qwen--2.5--32B-f05138?style=for-the-badge)](https://groq.com/)
 
 This repository contains the core system and methodology for **LeoFocus**, an intelligent, real-time focus-tracking application developed as a research initiative exploring Human-Computer Interaction (HCI), Real-Time OS Telemetry, and Generative AI Coaching.
 
@@ -47,7 +47,7 @@ Handles the UI state, user goal initialization, and renders real-time telemetry.
 **Backend (Python 3 Daemon)**
 Executes low-level event collection, distraction classification, and LLM orchestration. 
 * **OS Telemetry**: Utilizes native OS queries (`osascript` on macOS, `win32com` on Windows) to extract active window titles, document names, and physical input cadence via `pynput`.
-* **LLM Engine**: Integrates a Groq-powered API (`Llama-3.1-8B`) for ultra-low latency, real-time session evaluation.
+* **LLM Engine**: Integrates a Groq-powered API (`Qwen-2.5-32B`) for ultra-low latency, real-time session evaluation.
 * **IPC Protocol**: Communication between Flutter and Python is fully asynchronous, utilizing structured JSON lines over `stdout` / `stdin` Streams.
 
 ```mermaid
@@ -105,7 +105,7 @@ Double-click `start_windows.bat` in the root folder.
 - **Frontend:** Flutter (Dart ^3.10.0), Provider, Google Fonts
 - **Backend:** Python 3.9+
 - **Telemetry:** `pynput`, `pygetwindow`, `pywin32`
-- **AI Integration:** Groq SDK (`llama-3.1-8b-instant`)
+- **AI Integration:** Groq SDK (`qwen-2.5-32b`)
 
 ---
 

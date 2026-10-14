@@ -71,7 +71,7 @@ flowchart TD
     TR <--> AI
 
 ```
-## Methodology: The Deterministic Guardrail
+## LLM Guardrail
 
 To eliminate LLM hallucinations and prevent overly lenient focus evaluations, the backend enforces a deterministic mathematical guardrail. If the LLM assigns a focus score higher than what is realistically possible given the user's actual distraction metrics, the system automatically caps the score:
 
@@ -83,7 +83,7 @@ This ensures that the coaching feedback remains strictly accountable to the raw 
 
 ---
 
-## 🚀 How to run the app
+## How to run the app
 
 We provided automated launcher scripts that handle all the tedious setup (Python, dependencies, Virtual Environments, and API keys) for you.
 
